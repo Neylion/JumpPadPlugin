@@ -3,12 +3,8 @@ package se.fredsfursten.jumppadplugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 import org.bukkit.Location;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerMoveEvent;
 
 public class Jumper implements Listener {
 	private static Jumper singleton = null;
@@ -31,18 +27,10 @@ public class Jumper implements Listener {
 	}
 	
 	public void maybeJump(Player player, Location location) {
+		if (_jumpLocation == null) return;
+		if (_jumpVector == null) return;
 		if (shouldJump(location)) {
-			player.setFireTicks(2000);
 			doJump(player);
-		} else {
-			player.sendMessage(String.format("Jump location: (%d,%d,%d), your location: (%d,%d,%d)",
-					_jumpLocation.getBlockX(),
-					_jumpLocation.getBlockY(),
-					_jumpLocation.getBlockZ(),
-					location.getBlockX(),
-					location.getBlockY(),
-					location.getBlockZ()
-					));
 		}
 	}
 
@@ -61,19 +49,24 @@ public class Jumper implements Listener {
 
 	public boolean add(Player player, String[] args)
 	{
-		if (args.length < 4) {
+		if (args.length < 3) {
 			player.sendMessage("Incomplete command..");
 			return false;
 		}
 		try {
-			double velocityX = Double.parseDouble(args[1]);
-			double velocityY = Double.parseDouble(args[2]);
-			double velocityZ = Double.parseDouble(args[3]);
-			_jumpVector = new Vector(velocityX, velocityY, velocityZ);
-			_jumpLocation = player.getLocation();	
+			double upSpeed = Double.parseDouble(args[1]);
+			double forwardSpeed = Double.parseDouble(args[2]);
+			Location location = player.getLocation();
+			double yaw = location.getYaw();
+			double rad = yaw*Math.PI/180.0;
+			double vectorX = -Math.sin(rad)*forwardSpeed;
+			double vectorY = upSpeed;
+			double vectorZ = Math.cos(rad)*forwardSpeed;
+			_jumpVector = new Vector(vectorX, vectorY, vectorZ);
+			_jumpLocation = location;
 			return true;
 		} catch (Exception e) {
-			player.sendMessage("Could not parse the three numbers.");
+			player.sendMessage("Could not parse the two numbers.");
 			return false;
 		}
 	}
