@@ -1,0 +1,15 @@
+name: JumpPadPlugin
+main: se.fredsfursten.jumppadplugin.JumpPadPlugin
+version: 0.1
+author: vanbrayne
+description: A Minecraft plugin for so called "Jump Pad" functionality
+commands:
+  jumppad:
+    description: Control jump pads
+    usage: /jumppad add [vectorX] [vectorY] [vectorZ] | remove
+    permission: jumppad.activate
+    permission-message: You don't have <permission>
+permissions:
+  jumppad:
+    description: Gives access to all jumppad commands
+    default: op
