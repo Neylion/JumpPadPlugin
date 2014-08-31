@@ -1,5 +1,7 @@
 package se.fredsfursten.jumppadplugin;
 
+import java.util.HashMap;
+
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 import org.bukkit.Location;
@@ -9,8 +11,7 @@ import org.bukkit.event.Listener;
 public class Jumper implements Listener {
 	private static Jumper singleton = null;
 
-	private Vector _jumpVector = null;
-	private Location _jumpLocation = null;
+	private HashMap<String, Vector> _jumpPads = null;
 
 	private Jumper() {
 	}
@@ -24,28 +25,26 @@ public class Jumper implements Listener {
 	}
 
 	public void enable(JavaPlugin plugin){
+		_jumpPads = new HashMap<String, Vector>();
 	}
 	
 	public void maybeJump(Player player, Location location) {
-		if (_jumpLocation == null) return;
-		if (_jumpVector == null) return;
-		if (shouldJump(location)) {
-			doJump(player);
-		}
+		Vector jumpVector = jumpPadVector(location);
+		if (jumpVector == null) return;
+		player.setVelocity(jumpVector);
 	}
 
-	private void doJump(Player player) {
-		player.setVelocity(_jumpVector);
+	private Vector jumpPadVector(Location currentLocation) {
+		if (_jumpPads == null) return null;
+		String position = convert(currentLocation);
+		if (!_jumpPads.containsKey(position)) return null;
+		return _jumpPads.get(position);
 	}
-
-	private boolean shouldJump(Location currentLocation) {
-
-		return (_jumpLocation != null)
-				&& (currentLocation.getBlockX() == _jumpLocation.getBlockX())
-				&& (currentLocation.getBlockY() == _jumpLocation.getBlockY())
-				&& (currentLocation.getBlockZ() == _jumpLocation.getBlockZ());
+	
+	private String convert(Location location)
+	{
+		return String.format("%d;%d;%d", location.getBlockX(), location.getBlockY(), location.getBlockZ());
 	}
-
 
 	public boolean add(Player player, String[] args)
 	{
@@ -62,8 +61,9 @@ public class Jumper implements Listener {
 			double vectorX = -Math.sin(rad)*forwardSpeed;
 			double vectorY = upSpeed;
 			double vectorZ = Math.cos(rad)*forwardSpeed;
-			_jumpVector = new Vector(vectorX, vectorY, vectorZ);
-			_jumpLocation = location;
+			Vector jumpVector = new Vector(vectorX, vectorY, vectorZ);
+			String hash = convert(location);
+			_jumpPads.put(hash, jumpVector);
 			return true;
 		} catch (Exception e) {
 			player.sendMessage("Could not parse the two numbers.");
@@ -73,7 +73,7 @@ public class Jumper implements Listener {
 
 	public boolean remove(Player player)
 	{
-		_jumpLocation = null;
+		_jumpPads = new HashMap<String, Vector>();
 		return true;
 	}
 }
