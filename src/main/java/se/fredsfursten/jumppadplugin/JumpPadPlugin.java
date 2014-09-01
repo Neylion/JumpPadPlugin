@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -12,6 +13,8 @@ import se.fredsfursten.jumppadplugin.Jumper;
 
 public final class JumpPadPlugin extends JavaPlugin implements Listener {
 
+	static String rulesCommand = "/rules";
+	
 	@Override
 	public void onEnable() {
 		getLogger().info("onEnable has been invoked!");
@@ -25,8 +28,19 @@ public final class JumpPadPlugin extends JavaPlugin implements Listener {
 	}
 
 	@EventHandler
-	public void maybeJump(PlayerMoveEvent e) {
-		Jumper.get().maybeJump(e.getPlayer(), e.getTo());
+	public void maybeJump(PlayerMoveEvent event) {
+		Jumper.get().maybeJump(event.getPlayer(), event.getTo());
+	}
+	
+	@EventHandler
+	public void listenToCommands(PlayerCommandPreprocessEvent event) {
+		String message = event.getMessage();
+		if (message.toLowerCase().startsWith(rulesCommand))
+		{
+			Player player = event.getPlayer();
+			player.sendMessage("Getting permission");
+			player.addAttachment(this, "jumppad.jump", true);
+		}
 	}
 	
 	@Override
