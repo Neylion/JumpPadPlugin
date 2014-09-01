@@ -12,7 +12,8 @@ public class Jumper implements Listener {
 	private static Jumper singleton = null;
 	static String rulesCommand = "/rules";
 
-	private HashMap<String, Vector> _jumpPads = null;
+	private HashMap<String, JumpPadInfo> _jumpPadsByBlock = null;
+	private HashMap<String, JumpPadInfo> _jumpPadsByName = null;
 	private HashMap<Player, Player> _informedPlayers = null;
 	private JavaPlugin _plugin = null;
 
@@ -29,13 +30,14 @@ public class Jumper implements Listener {
 
 	public void enable(JavaPlugin plugin){
 		_plugin = plugin;
-		_jumpPads = new HashMap<String, Vector>();
+		_jumpPadsByBlock = new HashMap<String, JumpPadInfo>();
+		_jumpPadsByName = new HashMap<String, JumpPadInfo>();
 		_informedPlayers = new HashMap<Player, Player>();
 	}
 
 	public void maybeJump(Player player, Location location) {
-		Vector jumpVector = jumpPadVector(location);
-		if (jumpVector == null) {
+		JumpPadInfo info = jumpPadInfo(location);
+		if (info == null) {
 			forgetThatWeToldPlayerAboutTheRules(player);
 			return;
 		}
@@ -43,7 +45,7 @@ public class Jumper implements Listener {
 			maybeTellPlayerToReadTheRules(player);
 			return;
 		}
-		player.setVelocity(jumpVector);
+		player.setVelocity(info.getVelocityVector());
 	}
 
 	private boolean hasReadRules(Player player) {
@@ -63,37 +65,63 @@ public class Jumper implements Listener {
 		}
 	}
 
-	private Vector jumpPadVector(Location currentLocation) {
-		if (_jumpPads == null) return null;
-		String position = convert(currentLocation);
-		if (!_jumpPads.containsKey(position)) return null;
-		return _jumpPads.get(position);
-	}
-
-	private String convert(Location location)
-	{
-		return String.format("%d;%d;%d", location.getBlockX(), location.getBlockY(), location.getBlockZ());
+	private JumpPadInfo jumpPadInfo(Location currentLocation) {
+		if (_jumpPadsByBlock == null) return null;
+		String position = JumpPadInfo.toBlockHash(currentLocation);
+		if (!_jumpPadsByBlock.containsKey(position)) return null;
+		return _jumpPadsByBlock.get(position);
 	}
 
 	public boolean add(Player player, String[] args)
 	{
-		if (!hasMandatoryPermission(player, "jumppad.add")) return false;
-		if (args.length < 3) {
+		if (!hasMandatoryPermission(player, "jumppad.add")) return true;
+		if (args.length < 4) {
 			player.sendMessage("Incomplete command..");
 			return false;
 		}
+		
+		String name = args[1];
+		JumpPadInfo info = findJumpPadByName(player, name);
+		if (info != null)
+		{
+			player.sendMessage("Jumppad already exists: " + name);
+			return true;		
+		}		
+		
 		try {
-			double upSpeed = Double.parseDouble(args[1]);
-			double forwardSpeed = Double.parseDouble(args[2]);
 			Location location = player.getLocation();
-			double yaw = location.getYaw();
-			double rad = yaw*Math.PI/180.0;
-			double vectorX = -Math.sin(rad)*forwardSpeed;
-			double vectorY = upSpeed;
-			double vectorZ = Math.cos(rad)*forwardSpeed;
-			Vector jumpVector = new Vector(vectorX, vectorY, vectorZ);
-			String hash = convert(location);
-			_jumpPads.put(hash, jumpVector);
+			Vector velocityVector = convertToVelocityVector(location, Double.parseDouble(args[2]), Double.parseDouble(args[3]));
+			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player);
+			_jumpPadsByBlock.put(newInfo.getBlockHash(), newInfo);
+			_jumpPadsByName.put(newInfo.getName(), newInfo);
+			return true;
+		} catch (Exception e) {
+			player.sendMessage("Could not parse the two numbers (up speed and forward speed).");
+			return false;
+		}
+	}
+	
+	public boolean edit(Player player, String[] args)
+	{
+		if (!hasMandatoryPermission(player, "jumppad.edit")) return true;
+		if (args.length < 4) {
+			player.sendMessage("Incomplete command..");
+			return false;
+		}
+		
+		String name = args[1];
+		JumpPadInfo info = findJumpPadByName(player, name);
+		if (info == null)
+		{
+			player.sendMessage("Unknown jumppad: " + name);
+			return true;			
+		}		
+		
+		try {
+			Vector velocityVector = convertToVelocityVector(info.getLocation(), Double.parseDouble(args[2]), Double.parseDouble(args[3]));
+				JumpPadInfo newInfo = new JumpPadInfo(name, info.getLocation(), velocityVector, player);
+				_jumpPadsByBlock.put(newInfo.getBlockHash(), newInfo);
+				_jumpPadsByName.put(newInfo.getName(), newInfo);
 			return true;
 		} catch (Exception e) {
 			player.sendMessage("Could not parse the two numbers (up speed and forward speed).");
@@ -101,11 +129,67 @@ public class Jumper implements Listener {
 		}
 	}
 
-	public boolean remove(Player player)
+	private Vector convertToVelocityVector(Location location, double upSpeed, double forwardSpeed) {
+		double yaw = location.getYaw();
+		double rad = yaw*Math.PI/180.0;
+		double vectorX = -Math.sin(rad)*forwardSpeed;
+		double vectorY = upSpeed;
+		double vectorZ = Math.cos(rad)*forwardSpeed;
+		Vector jumpVector = new Vector(vectorX, vectorY, vectorZ);
+		return jumpVector;
+	}
+
+	public boolean remove(Player player, String[] args)
 	{
-		if (!hasMandatoryPermission(player, "jumppad.remove")) return false;
-		_jumpPads = new HashMap<String, Vector>();
+		if (!hasMandatoryPermission(player, "jumppad.remove")) return true;
+		if (args.length < 2) {
+			player.sendMessage("Incomplete command..");
+			return false;
+		}
+		String name = args[1];
+		JumpPadInfo info = findJumpPadByName(player, name);
+		if (info == null)
+		{
+			player.sendMessage("Unknown jumppad: " + name);
+			return true;			
+		}
+		_jumpPadsByName.remove(name);
+		_jumpPadsByBlock.remove(info.getBlockHash());
 		return true;
+	}
+
+	public boolean gotoJumpPad(Player player, String[] args)
+	{
+		if (!hasMandatoryPermission(player, "jumppad.goto")) return true;
+		if (args.length < 2) {
+			player.sendMessage("Incomplete command..");
+			return false;
+		}
+		String name = args[1];
+		JumpPadInfo info = findJumpPadByName(player, name);
+		if (info == null)
+		{
+			player.sendMessage("Unknown jumppad: " + name);
+			return true;			
+		}
+		player.teleport(info.getLocation());
+		return true;
+	}
+
+	public boolean list(Player player)
+	{
+		if (!hasMandatoryPermission(player, "jumppad.list")) return true;
+		
+		player.sendMessage("Jump pads:");
+		for (JumpPadInfo info : _jumpPadsByName.values()) {
+			player.sendMessage(String.format("%s (%s)", info.getName(), info.getPlayerName()));
+		}
+		return true;
+	}
+
+	private JumpPadInfo findJumpPadByName(Player player, String name) {
+		if (!_jumpPadsByName.containsKey(name)) return null;
+		return _jumpPadsByName.get(name);
 	}
 
 	private boolean hasMandatoryPermission(Player player, String permission)

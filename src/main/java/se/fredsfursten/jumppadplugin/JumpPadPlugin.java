@@ -52,7 +52,13 @@ public final class JumpPadPlugin extends JavaPlugin implements Listener {
 		if (command.equals("add")) {
 			return Jumper.get().add(player, args);
 		} else if (command.equals("remove")) {
-			return Jumper.get().remove(player);
+			return Jumper.get().remove(player, args);
+		} else if (command.equals("edit")) {
+			return Jumper.get().edit(player, args);
+		} else if (command.equals("list")) {
+			return Jumper.get().list(player);
+		} else if (command.equals("goto")) {
+			return Jumper.get().gotoJumpPad(player, args);
 		} else {
 			sender.sendMessage("Could not understand command.");
 			return false;

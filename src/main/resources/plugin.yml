@@ -6,8 +6,7 @@ description: A Minecraft plugin for so called "Jump Pad" functionality
 commands:
   jumppad:
     description: Control jump pads
-    usage: /jumppad add [up speed] [forward speed] | remove
-    permission: jumppad.activate
+    usage: /jumppad add <name> [up speed] [forward speed] | edit <name> [up speed] [forward speed] | remove <name> | goto <name> | list 
     permission-message: You don't have <permission>
 permissions:
   jumppad.*:
@@ -15,11 +14,23 @@ permissions:
     default: op
     jumppad.add: true
     jumppad.remove: true
+    jumppad.edit: true
+    jumppad.list: true
+    jumppad.goto: true
   jumppad.add:
     description: Access to /jumppad add command
     default: op
   jumppad.remove:
     description: Access to /jumppad remove command
+    default: op
+  jumppad.edit:
+    description: Access to /jumppad edit command
+    default: op
+  jumppad.list:
+    description: Access to /jumppad list command
+    default: op
+  jumppad.goto:
+    description: Access to /jumppad goto command
     default: op
   jumppad.jump:
     description: Can jump from a jumppad
