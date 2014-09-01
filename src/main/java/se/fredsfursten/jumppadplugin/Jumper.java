@@ -35,7 +35,10 @@ public class Jumper implements Listener {
 
 	public void maybeJump(Player player, Location location) {
 		Vector jumpVector = jumpPadVector(location);
-		if (jumpVector == null) return;
+		if (jumpVector == null) {
+			forgetThatWeToldPlayerAboutTheRules(player);
+			return;
+		}
 		if (!hasReadRules(player)) {
 			maybeTellPlayerToReadTheRules(player);
 			return;
@@ -51,6 +54,12 @@ public class Jumper implements Listener {
 		if (!_informedPlayers.containsKey(player)) {
 			player.sendMessage("Please read the global rules (/rules) to get access to the jump pads.");
 			_informedPlayers.put(player, player);
+		}
+	}
+
+	private void forgetThatWeToldPlayerAboutTheRules(Player player) {
+		if (_informedPlayers.containsKey(player)) {
+			_informedPlayers.remove(player);
 		}
 	}
 
