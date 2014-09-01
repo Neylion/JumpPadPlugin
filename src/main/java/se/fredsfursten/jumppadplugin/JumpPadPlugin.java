@@ -12,8 +12,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import se.fredsfursten.jumppadplugin.Jumper;
 
 public final class JumpPadPlugin extends JavaPlugin implements Listener {
-
-	static String rulesCommand = "/rules";
 	
 	@Override
 	public void onEnable() {
@@ -34,13 +32,7 @@ public final class JumpPadPlugin extends JavaPlugin implements Listener {
 	
 	@EventHandler
 	public void listenToCommands(PlayerCommandPreprocessEvent event) {
-		String message = event.getMessage();
-		if (message.toLowerCase().startsWith(rulesCommand))
-		{
-			Player player = event.getPlayer();
-			player.sendMessage("Getting permission");
-			player.addAttachment(this, "jumppad.jump", true);
-		}
+		Jumper.get().listenToCommands(event.getPlayer(), event.getMessage());
 	}
 	
 	@Override
