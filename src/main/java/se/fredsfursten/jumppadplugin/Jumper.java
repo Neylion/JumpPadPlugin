@@ -15,6 +15,7 @@ public class Jumper implements Listener {
 	private HashMap<String, JumpPadInfo> _jumpPadsByBlock = null;
 	private HashMap<String, JumpPadInfo> _jumpPadsByName = null;
 	private HashMap<Player, Player> _informedPlayers = null;
+	private HashMap<Player, Player> _noJumpPlayers = null;
 	private JavaPlugin _plugin = null;
 
 	private Jumper() {
@@ -33,18 +34,21 @@ public class Jumper implements Listener {
 		_jumpPadsByBlock = new HashMap<String, JumpPadInfo>();
 		_jumpPadsByName = new HashMap<String, JumpPadInfo>();
 		_informedPlayers = new HashMap<Player, Player>();
+		_noJumpPlayers = new HashMap<Player, Player>();
 	}
 
 	public void maybeJump(Player player, Location location) {
 		JumpPadInfo info = jumpPadInfo(location);
 		if (info == null) {
 			forgetThatWeToldPlayerAboutTheRules(player);
+			forgetNoJumpPlayer(player);
 			return;
 		}
 		if (!hasReadRules(player)) {
 			maybeTellPlayerToReadTheRules(player);
 			return;
 		}
+		if (_noJumpPlayers.containsKey(player)) return;
 		player.setVelocity(info.getVelocityVector());
 	}
 
@@ -56,6 +60,12 @@ public class Jumper implements Listener {
 		if (!_informedPlayers.containsKey(player)) {
 			player.sendMessage("Please read the global rules (/rules) to get access to the jump pads.");
 			_informedPlayers.put(player, player);
+		}
+	}
+
+	private void forgetNoJumpPlayer(Player player) {
+		if (_noJumpPlayers.containsKey(player)) {
+			_noJumpPlayers.remove(player);
 		}
 	}
 
@@ -94,6 +104,7 @@ public class Jumper implements Listener {
 			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player);
 			_jumpPadsByBlock.put(newInfo.getBlockHash(), newInfo);
 			_jumpPadsByName.put(newInfo.getName(), newInfo);
+			_noJumpPlayers.put(player, player);
 			return true;
 		} catch (Exception e) {
 			player.sendMessage("Could not parse the two numbers (up speed and forward speed).");
@@ -173,6 +184,7 @@ public class Jumper implements Listener {
 			return true;			
 		}
 		player.teleport(info.getLocation());
+		_noJumpPlayers.put(player, player);
 		return true;
 	}
 
