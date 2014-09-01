@@ -29,6 +29,10 @@ public class Jumper implements Listener {
 	}
 	
 	public void maybeJump(Player player, Location location) {
+		if (!player.hasPermission("jumppad.jump")) {
+			player.sendMessage("Please read the global rules (/rules) to get access to the jump pads.");
+			return;
+		}
 		Vector jumpVector = jumpPadVector(location);
 		if (jumpVector == null) return;
 		player.setVelocity(jumpVector);
@@ -48,6 +52,7 @@ public class Jumper implements Listener {
 
 	public boolean add(Player player, String[] args)
 	{
+		if (!hasMandatoryPermission(player, "jumppad.add")) return false;
 		if (args.length < 3) {
 			player.sendMessage("Incomplete command..");
 			return false;
@@ -66,14 +71,22 @@ public class Jumper implements Listener {
 			_jumpPads.put(hash, jumpVector);
 			return true;
 		} catch (Exception e) {
-			player.sendMessage("Could not parse the two numbers.");
+			player.sendMessage("Could not parse the two numbers (up speed and forward speed).");
 			return false;
 		}
 	}
 
 	public boolean remove(Player player)
 	{
+		if (!hasMandatoryPermission(player, "jumppad.remove")) return false;
 		_jumpPads = new HashMap<String, Vector>();
 		return true;
+	}
+	
+	private boolean hasMandatoryPermission(Player player, String permission)
+	{
+		if (player.hasPermission(permission)) return true;
+		player.sendMessage("You must have permission " + permission);
+		return false;
 	}
 }

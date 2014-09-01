@@ -10,6 +10,17 @@ commands:
     permission: jumppad.activate
     permission-message: You don't have <permission>
 permissions:
-  jumppad:
+  jumppad.*:
     description: Gives access to all jumppad commands
+    default: op
+    jumppad.add: true
+    jumppad.remove: true
+  jumppad.add:
+    description: Access to /jumppad add command
+    default: op
+  jumppad.remove:
+    description: Access to /jumppad remove command
+    default: op
+  jumppad.jump:
+    description: Can jump from a jumppad
     default: op
