@@ -1,5 +1,6 @@
 package se.fredsfursten.jumppadplugin;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 import org.bukkit.plugin.java.JavaPlugin;
@@ -30,11 +31,19 @@ public class Jumper implements Listener {
 	}
 
 	public void enable(JavaPlugin plugin){
+		JumpPadInfoPersistance.onEnable(plugin);
 		_plugin = plugin;
+
 		_jumpPadsByBlock = new HashMap<String, JumpPadInfo>();
 		_jumpPadsByName = new HashMap<String, JumpPadInfo>();
 		_informedPlayers = new HashMap<Player, Player>();
 		_noJumpPlayers = new HashMap<Player, Player>();
+
+		JumpPadInfoPersistance persistance = JumpPadInfoPersistance.get();
+		Collection<JumpPadInfo> infos = persistance.load();
+		for (JumpPadInfo info : infos) {
+			this.addInfo(null, info);
+		}
 	}
 
 	public void maybeJump(Player player, Location location) {
@@ -89,7 +98,7 @@ public class Jumper implements Listener {
 			player.sendMessage("Incomplete command..");
 			return false;
 		}
-		
+
 		String name = args[1];
 		JumpPadInfo info = findJumpPadByName(player, name);
 		if (info != null)
@@ -97,21 +106,36 @@ public class Jumper implements Listener {
 			player.sendMessage("Jumppad already exists: " + name);
 			return true;		
 		}		
-		
+
+		Location location;
+		Vector velocityVector;
 		try {
-			Location location = player.getLocation();
-			Vector velocityVector = convertToVelocityVector(location, Double.parseDouble(args[2]), Double.parseDouble(args[3]));
-			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player);
-			_jumpPadsByBlock.put(newInfo.getBlockHash(), newInfo);
-			_jumpPadsByName.put(newInfo.getName(), newInfo);
-			_noJumpPlayers.put(player, player);
-			return true;
+			location = player.getLocation();
+			velocityVector = convertToVelocityVector(location, Double.parseDouble(args[2]), Double.parseDouble(args[3]));
 		} catch (Exception e) {
 			player.sendMessage("Could not parse the two numbers (up speed and forward speed).");
 			return false;
 		}
+		try {
+			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player);
+			addInfo(player, newInfo);
+			JumpPadInfoPersistance persistance = JumpPadInfoPersistance.get();
+			persistance.create(newInfo);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
-	
+
+	private void addInfo(Player player, JumpPadInfo newInfo) {
+		_jumpPadsByBlock.put(newInfo.getBlockHash(), newInfo);
+		_jumpPadsByName.put(newInfo.getName(), newInfo);
+		if (player != null) {
+			_noJumpPlayers.put(player, player);
+		}
+	}
+
 	public boolean edit(Player player, String[] args)
 	{
 		if (!hasMandatoryPermission(player, "jumppad.edit")) return true;
@@ -119,7 +143,7 @@ public class Jumper implements Listener {
 			player.sendMessage("Incomplete command..");
 			return false;
 		}
-		
+
 		String name = args[1];
 		JumpPadInfo info = findJumpPadByName(player, name);
 		if (info == null)
@@ -127,12 +151,12 @@ public class Jumper implements Listener {
 			player.sendMessage("Unknown jumppad: " + name);
 			return true;			
 		}		
-		
+
 		try {
 			Vector velocityVector = convertToVelocityVector(info.getLocation(), Double.parseDouble(args[2]), Double.parseDouble(args[3]));
-				JumpPadInfo newInfo = new JumpPadInfo(name, info.getLocation(), velocityVector, player);
-				_jumpPadsByBlock.put(newInfo.getBlockHash(), newInfo);
-				_jumpPadsByName.put(newInfo.getName(), newInfo);
+			JumpPadInfo newInfo = new JumpPadInfo(name, info.getLocation(), velocityVector, player);
+			_jumpPadsByBlock.put(newInfo.getBlockHash(), newInfo);
+			_jumpPadsByName.put(newInfo.getName(), newInfo);
 			return true;
 		} catch (Exception e) {
 			player.sendMessage("Could not parse the two numbers (up speed and forward speed).");
@@ -191,7 +215,7 @@ public class Jumper implements Listener {
 	public boolean list(Player player)
 	{
 		if (!hasMandatoryPermission(player, "jumppad.list")) return true;
-		
+
 		player.sendMessage("Jump pads:");
 		for (JumpPadInfo info : _jumpPadsByName.values()) {
 			player.sendMessage(String.format("%s (%s)", info.getName(), info.getPlayerName()));
