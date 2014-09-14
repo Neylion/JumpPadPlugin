@@ -17,12 +17,13 @@ public final class JumpPadPlugin extends JavaPlugin implements Listener {
 	public void onEnable() {
 		getLogger().info("onEnable has been invoked!");
 		getServer().getPluginManager().registerEvents(this, this);		
-		Jumper.get().enable(this);
+		Jumper.get().load(this);
 	}
 
 	@Override
 	public void onDisable() {
 		getLogger().info("onDisable has been invoked!");
+		Jumper.get().save();
 	}
 
 	@EventHandler

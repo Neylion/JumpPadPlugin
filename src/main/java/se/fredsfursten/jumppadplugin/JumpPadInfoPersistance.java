@@ -26,17 +26,18 @@ public class JumpPadInfoPersistance {
 	private JumpPadInfoPersistance()  {
 	}
 
-	public static void onEnable(Plugin plugin)
+	public void onEnable(Plugin plugin)
 	{
-		JumpPadInfoPersistance instance = get();
-		instance._plugin = plugin;
-		MySQL MySQL = new MySQL(plugin, "hetzner.havokoc.se", "80", "jumppad", "jumppad", "bq69r9aL5Yp4EeHS");
+		this._plugin = plugin;
+		MySQL MySQL = new MySQL(plugin, "hetzner.havokoc.se", "3306", "jumppad", "jumppad", "bq69r9aL5Yp4EeHS");
 		try {
-			instance._connection = MySQL.openConnection();
+			this._connection = MySQL.openConnection();
 		} catch (ClassNotFoundException | SQLException e) {
 			// TODO Auto-generated catch block
+			plugin.getLogger().info(e.getMessage());
 			e.printStackTrace();
-		}		
+		}
+		plugin.getLogger().info("Connected to DB");
 	}
 
 	public static JumpPadInfoPersistance get()

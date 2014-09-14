@@ -30,8 +30,8 @@ public class Jumper implements Listener {
 		return singleton;
 	}
 
-	public void enable(JavaPlugin plugin){
-		JumpPadInfoPersistance.onEnable(plugin);
+	public void load(JavaPlugin plugin){
+		JumpPadInfoPersistance.get().onEnable(plugin);
 		_plugin = plugin;
 
 		_jumpPadsByBlock = new HashMap<String, JumpPadInfo>();
@@ -44,6 +44,15 @@ public class Jumper implements Listener {
 		for (JumpPadInfo info : infos) {
 			this.addInfo(null, info);
 		}
+		plugin.getLogger().info("Loaded data");
+	}
+
+	public void save(){
+		JumpPadInfoPersistance persistance = JumpPadInfoPersistance.get();
+		for (JumpPadInfo info : _jumpPadsByBlock.values()) {
+			persistance.create(info);
+		}
+		this._plugin.getLogger().info("Saved data");
 	}
 
 	public void maybeJump(Player player, Location location) {
@@ -119,8 +128,6 @@ public class Jumper implements Listener {
 		try {
 			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player);
 			addInfo(player, newInfo);
-			JumpPadInfoPersistance persistance = JumpPadInfoPersistance.get();
-			persistance.create(newInfo);
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
