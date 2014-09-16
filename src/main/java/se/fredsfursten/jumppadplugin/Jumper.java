@@ -86,9 +86,9 @@ public class Jumper implements Listener {
 			return;
 		}
 		if (_noJumpPlayers.containsKey(player)) return;
-		// Nudge the player off the ground to always have no friction (being in the air)
 		
-		player.teleport(player.getLocation());//.add(0.0,0.001,0.0));
+		// Nudge the player off the ground to always have no friction (being in the air)
+		player.teleport(player.getLocation().add(0.0,0.01,0.0));
 		player.setVelocity(info.getVelocity());
 	}
 
