@@ -4,7 +4,7 @@ A JumpPad plugin for Minecraft
 
 ## Release history
 
-### develop
+### 1.0.1 (2014-09-16)
 
 * NEW: Nudges the user up in the air before sending him away, to avoid speed differences due to friction differens beteween air and ground.
 * CHANGE: Shorter usage text, showing detailed usage text only if a sub command is issued
