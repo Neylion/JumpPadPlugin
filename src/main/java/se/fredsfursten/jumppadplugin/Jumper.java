@@ -1,5 +1,7 @@
 package se.fredsfursten.jumppadplugin;
 
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.bukkit.plugin.java.JavaPlugin;
@@ -9,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
 public class Jumper implements Listener {
+	private static final String FILE_PATH = "plugins/JumpPad/jumppad_locations.bin";
 	private static Jumper singleton = null;
 	static String rulesCommand = "/rules";
 
@@ -29,12 +32,46 @@ public class Jumper implements Listener {
 		return singleton;
 	}
 
-	public void enable(JavaPlugin plugin){
+	public void load(JavaPlugin plugin){
 		_plugin = plugin;
+
 		_jumpPadsByBlock = new HashMap<String, JumpPadInfo>();
 		_jumpPadsByName = new HashMap<String, JumpPadInfo>();
 		_informedPlayers = new HashMap<Player, Player>();
 		_noJumpPlayers = new HashMap<Player, Player>();
+
+		ArrayList<JumpPadStorage> jumpPadStorageList;
+		try {
+			jumpPadStorageList = SavingAndLoading.load(FILE_PATH);
+		} catch (FileNotFoundException e) {
+			plugin.getLogger().info("No jump pad data found.");
+			return;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			plugin.getLogger().info("Failed to load data.");
+			return;
+		}
+		for (JumpPadStorage jumpPadStorage : jumpPadStorageList) {
+			this.addInfo(null, jumpPadStorage.getJumpPadInfo());
+		}
+		this._plugin.getLogger().info(String.format("Loaded %d JumpPads", jumpPadStorageList.size()));
+	}
+
+	public void save() {
+		ArrayList<JumpPadStorage> jumpPadStorageList = new ArrayList<JumpPadStorage>();
+		for (JumpPadInfo jumpPadInfo : _jumpPadsByBlock.values()) {
+			jumpPadStorageList.add(new JumpPadStorage(jumpPadInfo));
+		}
+		try {
+			SavingAndLoading.save(jumpPadStorageList, FILE_PATH);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			this._plugin.getLogger().info("Failed to save data.");
+			return;
+		}
+		this._plugin.getLogger().info(String.format("Saved %d JumpPads", jumpPadStorageList.size()));
 	}
 
 	public void maybeJump(Player player, Location location) {
@@ -49,7 +86,7 @@ public class Jumper implements Listener {
 			return;
 		}
 		if (_noJumpPlayers.containsKey(player)) return;
-		player.setVelocity(info.getVelocityVector());
+		player.setVelocity(info.getVelocity());
 	}
 
 	private boolean hasReadRules(Player player) {
@@ -89,7 +126,7 @@ public class Jumper implements Listener {
 			player.sendMessage("Incomplete command..");
 			return false;
 		}
-		
+
 		String name = args[1];
 		JumpPadInfo info = findJumpPadByName(player, name);
 		if (info != null)
@@ -97,21 +134,34 @@ public class Jumper implements Listener {
 			player.sendMessage("Jumppad already exists: " + name);
 			return true;		
 		}		
-		
+
+		Location location;
+		Vector velocityVector;
 		try {
-			Location location = player.getLocation();
-			Vector velocityVector = convertToVelocityVector(location, Double.parseDouble(args[2]), Double.parseDouble(args[3]));
-			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player);
-			_jumpPadsByBlock.put(newInfo.getBlockHash(), newInfo);
-			_jumpPadsByName.put(newInfo.getName(), newInfo);
-			_noJumpPlayers.put(player, player);
-			return true;
+			location = player.getLocation();
+			velocityVector = convertToVelocityVector(location, Double.parseDouble(args[2]), Double.parseDouble(args[3]));
 		} catch (Exception e) {
 			player.sendMessage("Could not parse the two numbers (up speed and forward speed).");
 			return false;
 		}
+		try {
+			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player.getUniqueId(), player.getName());
+			addInfo(player, newInfo);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
-	
+
+	private void addInfo(Player player, JumpPadInfo newInfo) {
+		_jumpPadsByBlock.put(newInfo.getBlockHash(), newInfo);
+		_jumpPadsByName.put(newInfo.getName(), newInfo);
+		if (player != null) {
+			_noJumpPlayers.put(player, player);
+		}
+	}
+
 	public boolean edit(Player player, String[] args)
 	{
 		if (!hasMandatoryPermission(player, "jumppad.edit")) return true;
@@ -119,7 +169,7 @@ public class Jumper implements Listener {
 			player.sendMessage("Incomplete command..");
 			return false;
 		}
-		
+
 		String name = args[1];
 		JumpPadInfo info = findJumpPadByName(player, name);
 		if (info == null)
@@ -127,12 +177,12 @@ public class Jumper implements Listener {
 			player.sendMessage("Unknown jumppad: " + name);
 			return true;			
 		}		
-		
+
 		try {
 			Vector velocityVector = convertToVelocityVector(info.getLocation(), Double.parseDouble(args[2]), Double.parseDouble(args[3]));
-				JumpPadInfo newInfo = new JumpPadInfo(name, info.getLocation(), velocityVector, player);
-				_jumpPadsByBlock.put(newInfo.getBlockHash(), newInfo);
-				_jumpPadsByName.put(newInfo.getName(), newInfo);
+			JumpPadInfo newInfo = new JumpPadInfo(name, info.getLocation(), velocityVector, player.getUniqueId(), player.getName());
+			_jumpPadsByBlock.put(newInfo.getBlockHash(), newInfo);
+			_jumpPadsByName.put(newInfo.getName(), newInfo);
 			return true;
 		} catch (Exception e) {
 			player.sendMessage("Could not parse the two numbers (up speed and forward speed).");
@@ -191,10 +241,10 @@ public class Jumper implements Listener {
 	public boolean list(Player player)
 	{
 		if (!hasMandatoryPermission(player, "jumppad.list")) return true;
-		
+
 		player.sendMessage("Jump pads:");
 		for (JumpPadInfo info : _jumpPadsByName.values()) {
-			player.sendMessage(String.format("%s (%s)", info.getName(), info.getPlayerName()));
+			player.sendMessage(String.format("%s (%s)", info.getName(), info.getCreatorName()));
 		}
 		return true;
 	}

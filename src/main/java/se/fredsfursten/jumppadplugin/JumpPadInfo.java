@@ -1,30 +1,40 @@
 package se.fredsfursten.jumppadplugin;
 
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 class JumpPadInfo {
-	private Vector velocityVector;
+	private Vector velocity;
 	private Location location;
 	private String name;
-	private Player player;
-	public JumpPadInfo(String name, Location location, Vector velocityVector, Player player)
+	private UUID creatorId;
+	private String creatorName;
+	
+	public JumpPadInfo(String name, Location location, Vector velocity, UUID creatorId, String creatorName)
 	{
-		this.velocityVector = velocityVector;
+		this.velocity = velocity;
 		this.name = name;
 		this.location = location;
-		this.player = player;
+		this.creatorId = creatorId;
+		this.creatorName = creatorName;
 	}
-	public Vector getVelocityVector() {
-		return this.velocityVector;
+	
+	public Vector getVelocity() {
+		return this.velocity;
 	}
+	
 	public String getName() {
 		return this.name;
 	}
+	
 	public Location getLocation() {
 		return this.location;
 	}
+	
 	public String getBlockHash() {
 		return JumpPadInfo.toBlockHash(this.location);
 	}
@@ -33,10 +43,17 @@ class JumpPadInfo {
 	{
 		return String.format("%d;%d;%d", location.getBlockX(), location.getBlockY(), location.getBlockZ());
 	}
-	public Player getPlayer() {
-		return this.player;
+	
+	public Player getCreator()
+	{
+		return Bukkit.getServer().getPlayer(this.creatorId);
 	}
-	public String getPlayerName() {
-		return this.player.getDisplayName();
+	
+	public String getCreatorName() {
+		return this.creatorName;
+	}
+	
+	public UUID getCreatorId() {
+		return this.creatorId;
 	}
 }
