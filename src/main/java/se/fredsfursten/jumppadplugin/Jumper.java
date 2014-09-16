@@ -75,7 +75,7 @@ public class Jumper implements Listener {
 	}
 
 	public void maybeJump(Player player, Location location) {
-		JumpPadInfo info = jumpPadInfo(location);
+		JumpPadInfo info = findJumpPadInfo(location);
 		if (info == null) {
 			forgetThatWeToldPlayerAboutTheRules(player);
 			forgetNoJumpPlayer(player);
@@ -86,6 +86,9 @@ public class Jumper implements Listener {
 			return;
 		}
 		if (_noJumpPlayers.containsKey(player)) return;
+		// Nudge the player off the ground to always have no friction (being in the air)
+		
+		player.teleport(player.getLocation());//.add(0.0,0.001,0.0));
 		player.setVelocity(info.getVelocity());
 	}
 
@@ -112,14 +115,14 @@ public class Jumper implements Listener {
 		}
 	}
 
-	private JumpPadInfo jumpPadInfo(Location currentLocation) {
+	private JumpPadInfo findJumpPadInfo(Location currentLocation) {
 		if (_jumpPadsByBlock == null) return null;
 		String position = JumpPadInfo.toBlockHash(currentLocation);
 		if (!_jumpPadsByBlock.containsKey(position)) return null;
 		return _jumpPadsByBlock.get(position);
 	}
 
-	public boolean add(Player player, String[] args)
+	public boolean addCommand(Player player, String[] args)
 	{
 		if (!hasMandatoryPermission(player, "jumppad.add")) return true;
 		if ((args.length < 3) || (args.length > 4)) {
@@ -169,7 +172,7 @@ public class Jumper implements Listener {
 		}
 	}
 
-	public boolean edit(Player player, String[] args)
+	public boolean editCommand(Player player, String[] args)
 	{
 		if (!hasMandatoryPermission(player, "jumppad.edit")) return true;
 		if ((args.length < 3) || (args.length > 4)) {
@@ -214,7 +217,7 @@ public class Jumper implements Listener {
 		return jumpVector;
 	}
 
-	public boolean remove(Player player, String[] args)
+	public boolean removeCommand(Player player, String[] args)
 	{
 		if (!hasMandatoryPermission(player, "jumppad.remove")) return true;
 		if (args.length < 2) {
@@ -233,7 +236,7 @@ public class Jumper implements Listener {
 		return true;
 	}
 
-	public boolean gotoJumpPad(Player player, String[] args)
+	public boolean gotoCommand(Player player, String[] args)
 	{
 		if (!hasMandatoryPermission(player, "jumppad.goto")) return true;
 		if (args.length < 2) {
@@ -252,7 +255,7 @@ public class Jumper implements Listener {
 		return true;
 	}
 
-	public boolean list(Player player)
+	public boolean listCommand(Player player)
 	{
 		if (!hasMandatoryPermission(player, "jumppad.list")) return true;
 

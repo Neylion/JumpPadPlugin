@@ -28,7 +28,7 @@ public final class JumpPadPlugin extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void maybeJump(PlayerMoveEvent event) {
-		Jumper.get().maybeJump(event.getPlayer(), event.getTo());
+	    Jumper.get().maybeJump(event.getPlayer(), event.getTo());
 	}
 	
 	@EventHandler
@@ -51,15 +51,15 @@ public final class JumpPadPlugin extends JavaPlugin implements Listener {
 
 		String command = args[0].toLowerCase();
 		if (command.equals("add")) {
-			return Jumper.get().add(player, args);
+			return Jumper.get().addCommand(player, args);
 		} else if (command.equals("remove")) {
-			return Jumper.get().remove(player, args);
+			return Jumper.get().removeCommand(player, args);
 		} else if (command.equals("edit")) {
-			return Jumper.get().edit(player, args);
+			return Jumper.get().editCommand(player, args);
 		} else if (command.equals("list")) {
-			return Jumper.get().list(player);
+			return Jumper.get().listCommand(player);
 		} else if (command.equals("goto")) {
-			return Jumper.get().gotoJumpPad(player, args);
+			return Jumper.get().gotoCommand(player, args);
 		} else {
 			sender.sendMessage("Could not understand command.");
 			return false;
