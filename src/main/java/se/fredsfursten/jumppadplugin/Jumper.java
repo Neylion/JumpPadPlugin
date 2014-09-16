@@ -55,7 +55,7 @@ public class Jumper implements Listener {
 		for (JumpPadStorage jumpPadStorage : jumpPadStorageList) {
 			this.addInfo(null, jumpPadStorage.getJumpPadInfo());
 		}
-		plugin.getLogger().info("Loaded data");
+		this._plugin.getLogger().info(String.format("Loaded %d JumpPads", jumpPadStorageList.size()));
 	}
 
 	public void save() {
@@ -71,7 +71,7 @@ public class Jumper implements Listener {
 			this._plugin.getLogger().info("Failed to save data.");
 			return;
 		}
-		this._plugin.getLogger().info("Saved data");
+		this._plugin.getLogger().info(String.format("Saved %d JumpPads", jumpPadStorageList.size()));
 	}
 
 	public void maybeJump(Player player, Location location) {
@@ -145,7 +145,7 @@ public class Jumper implements Listener {
 			return false;
 		}
 		try {
-			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player);
+			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player.getUniqueId(), player.getName());
 			addInfo(player, newInfo);
 			return true;
 		} catch (Exception e) {
@@ -180,7 +180,7 @@ public class Jumper implements Listener {
 
 		try {
 			Vector velocityVector = convertToVelocityVector(info.getLocation(), Double.parseDouble(args[2]), Double.parseDouble(args[3]));
-			JumpPadInfo newInfo = new JumpPadInfo(name, info.getLocation(), velocityVector, player);
+			JumpPadInfo newInfo = new JumpPadInfo(name, info.getLocation(), velocityVector, player.getUniqueId(), player.getName());
 			_jumpPadsByBlock.put(newInfo.getBlockHash(), newInfo);
 			_jumpPadsByName.put(newInfo.getName(), newInfo);
 			return true;
@@ -244,7 +244,7 @@ public class Jumper implements Listener {
 
 		player.sendMessage("Jump pads:");
 		for (JumpPadInfo info : _jumpPadsByName.values()) {
-			player.sendMessage(String.format("%s (%s)", info.getName(), info.getPlayerName()));
+			player.sendMessage(String.format("%s (%s)", info.getName(), info.getCreatorName()));
 		}
 		return true;
 	}

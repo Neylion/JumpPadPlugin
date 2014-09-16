@@ -19,9 +19,10 @@ class JumpPadStorage implements Serializable {
 	private double locationZ;
 	private UUID worldId;
 	private String name;
-	private UUID playerId;
+	private UUID creatorId;
+	private String creatorName;
 	
-	public JumpPadStorage(String name, Location location, Vector velocity, Player player)
+	public JumpPadStorage(String name, Location location, Vector velocity, UUID creatorId, String creatorName)
 	{
 		this.name = name;
 		this.locationX =location.getX();
@@ -31,12 +32,18 @@ class JumpPadStorage implements Serializable {
 		this.velocityX = velocity.getX();
 		this.velocityY = velocity.getY();
 		this.velocityZ = velocity.getZ();
-		this.playerId = player.getUniqueId();
+		this.creatorId = creatorId;
+		this.creatorName = creatorName;
+		
+		Player creator = getCreator();
+		if (creator != null){
+			this.creatorName = creator.getName();
+		}
 	}
 	
 	public JumpPadStorage(JumpPadInfo jumpPadInfo)
 	{
-		this(jumpPadInfo.getName(), jumpPadInfo.getLocation(), jumpPadInfo.getVelocity(), jumpPadInfo.getPlayer());
+		this(jumpPadInfo.getName(), jumpPadInfo.getLocation(), jumpPadInfo.getVelocity(), jumpPadInfo.getCreatorId(), jumpPadInfo.getCreatorName());
 	}
 	
 	public World getWorld()
@@ -54,13 +61,18 @@ class JumpPadStorage implements Serializable {
 		return new Vector(this.velocityX, this.velocityY, this.velocityZ);
 	}
 	
-	public Player getPlayer()
+	public Player getCreator()
 	{
-		return Bukkit.getServer().getPlayer(this.playerId);
+		return Bukkit.getServer().getPlayer(this.creatorId);
 	}
 	
 	public JumpPadInfo getJumpPadInfo()
 	{
-		return new JumpPadInfo(this.name, getLocation(), getVelocity(), getPlayer());
+		Player creator = getCreator();
+		if (creator != null)
+		{
+			this.creatorName = creator.getName();
+		}
+		return new JumpPadInfo(this.name, getLocation(), getVelocity(), this.creatorId, this.creatorName);
 	}
 }
