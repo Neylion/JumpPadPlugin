@@ -5,19 +5,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 class JumpPadInfo {
-	private Vector velocityVector;
+	private Vector velocity;
 	private Location location;
 	private String name;
 	private Player player;
-	public JumpPadInfo(String name, Location location, Vector velocityVector, Player player)
+	public JumpPadInfo(String name, Location location, Vector velocity, Player player)
 	{
-		this.velocityVector = velocityVector;
+		this.velocity = velocity;
 		this.name = name;
 		this.location = location;
 		this.player = player;
 	}
-	public Vector getVelocityVector() {
-		return this.velocityVector;
+	public Vector getVelocity() {
+		return this.velocity;
 	}
 	public String getName() {
 		return this.name;

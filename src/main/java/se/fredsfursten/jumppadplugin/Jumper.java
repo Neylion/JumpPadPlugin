@@ -1,6 +1,7 @@
 package se.fredsfursten.jumppadplugin;
 
-import java.util.Collection;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.bukkit.plugin.java.JavaPlugin;
@@ -10,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
 public class Jumper implements Listener {
+	private static final String FILE_PATH = "plugins/JumpPad/jumppad_locations.bin";
 	private static Jumper singleton = null;
 	static String rulesCommand = "/rules";
 
@@ -31,7 +33,6 @@ public class Jumper implements Listener {
 	}
 
 	public void load(JavaPlugin plugin){
-		JumpPadInfoPersistance.get().onEnable(plugin);
 		_plugin = plugin;
 
 		_jumpPadsByBlock = new HashMap<String, JumpPadInfo>();
@@ -39,18 +40,36 @@ public class Jumper implements Listener {
 		_informedPlayers = new HashMap<Player, Player>();
 		_noJumpPlayers = new HashMap<Player, Player>();
 
-		JumpPadInfoPersistance persistance = JumpPadInfoPersistance.get();
-		Collection<JumpPadInfo> infos = persistance.load();
-		for (JumpPadInfo info : infos) {
-			this.addInfo(null, info);
+		ArrayList<JumpPadStorage> jumpPadStorageList;
+		try {
+			jumpPadStorageList = SavingAndLoading.load(FILE_PATH);
+		} catch (FileNotFoundException e) {
+			plugin.getLogger().info("No jump pad data found.");
+			return;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			plugin.getLogger().info("Failed to load data.");
+			return;
+		}
+		for (JumpPadStorage jumpPadStorage : jumpPadStorageList) {
+			this.addInfo(null, jumpPadStorage.getJumpPadInfo());
 		}
 		plugin.getLogger().info("Loaded data");
 	}
 
-	public void save(){
-		JumpPadInfoPersistance persistance = JumpPadInfoPersistance.get();
-		for (JumpPadInfo info : _jumpPadsByBlock.values()) {
-			persistance.create(info);
+	public void save() {
+		ArrayList<JumpPadStorage> jumpPadStorageList = new ArrayList<JumpPadStorage>();
+		for (JumpPadInfo jumpPadInfo : _jumpPadsByBlock.values()) {
+			jumpPadStorageList.add(new JumpPadStorage(jumpPadInfo));
+		}
+		try {
+			SavingAndLoading.save(jumpPadStorageList, FILE_PATH);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			this._plugin.getLogger().info("Failed to save data.");
+			return;
 		}
 		this._plugin.getLogger().info("Saved data");
 	}
@@ -67,7 +86,7 @@ public class Jumper implements Listener {
 			return;
 		}
 		if (_noJumpPlayers.containsKey(player)) return;
-		player.setVelocity(info.getVelocityVector());
+		player.setVelocity(info.getVelocity());
 	}
 
 	private boolean hasReadRules(Player player) {
