@@ -122,9 +122,9 @@ public class Jumper implements Listener {
 	public boolean add(Player player, String[] args)
 	{
 		if (!hasMandatoryPermission(player, "jumppad.add")) return true;
-		if (args.length < 4) {
-			player.sendMessage("Incomplete command..");
-			return false;
+		if ((args.length < 3) || (args.length > 4)) {
+			player.sendMessage("/jumppad add <name> <up speed> [<forward speed>]");
+			return true;
 		}
 
 		String name = args[1];
@@ -137,12 +137,19 @@ public class Jumper implements Listener {
 
 		Location location;
 		Vector velocityVector;
+		String upSpeed = args[2];
+		String forwardSpeed = "0.0";
+		if (args.length > 3)
+		{
+			forwardSpeed = args[3];
+		}
+		
 		try {
 			location = player.getLocation();
-			velocityVector = convertToVelocityVector(location, Double.parseDouble(args[2]), Double.parseDouble(args[3]));
+			velocityVector = convertToVelocityVector(location, Double.parseDouble(upSpeed), Double.parseDouble(forwardSpeed));
 		} catch (Exception e) {
-			player.sendMessage("Could not parse the two numbers (up speed and forward speed).");
-			return false;
+			player.sendMessage("/jumppad add <name> <up speed> [<forward speed>]");
+			return true;
 		}
 		try {
 			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player.getUniqueId(), player.getName());
@@ -165,9 +172,9 @@ public class Jumper implements Listener {
 	public boolean edit(Player player, String[] args)
 	{
 		if (!hasMandatoryPermission(player, "jumppad.edit")) return true;
-		if (args.length < 4) {
-			player.sendMessage("Incomplete command..");
-			return false;
+		if ((args.length < 3) || (args.length > 4)) {
+			player.sendMessage("/jumppad edit <name> <up speed> [<forward speed>]");
+			return true;
 		}
 
 		String name = args[1];
@@ -178,15 +185,22 @@ public class Jumper implements Listener {
 			return true;			
 		}		
 
+		String upSpeed = args[2];
+		String forwardSpeed = "0.0";
+		if (args.length > 3)
+		{
+			forwardSpeed = args[3];
+		}
+
 		try {
-			Vector velocityVector = convertToVelocityVector(info.getLocation(), Double.parseDouble(args[2]), Double.parseDouble(args[3]));
+			Vector velocityVector = convertToVelocityVector(info.getLocation(), Double.parseDouble(upSpeed), Double.parseDouble(forwardSpeed));
 			JumpPadInfo newInfo = new JumpPadInfo(name, info.getLocation(), velocityVector, player.getUniqueId(), player.getName());
 			_jumpPadsByBlock.put(newInfo.getBlockHash(), newInfo);
 			_jumpPadsByName.put(newInfo.getName(), newInfo);
 			return true;
 		} catch (Exception e) {
-			player.sendMessage("Could not parse the two numbers (up speed and forward speed).");
-			return false;
+			player.sendMessage("/jumppad edit <name> <up speed> [<forward speed>]");
+			return true;
 		}
 	}
 
@@ -204,8 +218,8 @@ public class Jumper implements Listener {
 	{
 		if (!hasMandatoryPermission(player, "jumppad.remove")) return true;
 		if (args.length < 2) {
-			player.sendMessage("Incomplete command..");
-			return false;
+			player.sendMessage("/jumppad remove <name>");
+			return true;
 		}
 		String name = args[1];
 		JumpPadInfo info = findJumpPadByName(player, name);
@@ -223,8 +237,8 @@ public class Jumper implements Listener {
 	{
 		if (!hasMandatoryPermission(player, "jumppad.goto")) return true;
 		if (args.length < 2) {
-			player.sendMessage("Incomplete command..");
-			return false;
+			player.sendMessage("/jumppad goto <name>");
+			return true;
 		}
 		String name = args[1];
 		JumpPadInfo info = findJumpPadByName(player, name);
