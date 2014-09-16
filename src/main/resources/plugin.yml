@@ -6,7 +6,7 @@ description: A Minecraft plugin for so called "Jump Pad" functionality
 commands:
   jumppad:
     description: Control jump pads
-    usage: /jumppad add <name> [up speed] [forward speed] | edit <name> [up speed] [forward speed] | remove <name> | goto <name> | list 
+    usage: /jumppad add| remove | edit | goto | list 
     permission-message: You don't have <permission>
 permissions:
   jumppad.*:

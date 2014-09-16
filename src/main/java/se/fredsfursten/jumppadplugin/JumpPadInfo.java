@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
@@ -41,7 +42,12 @@ class JumpPadInfo {
 
 	public static String toBlockHash(Location location)
 	{
-		return String.format("%d;%d;%d", location.getBlockX(), location.getBlockY(), location.getBlockZ());
+		return toBlockHash(location.getBlock());
+	}
+
+	public static String toBlockHash(Block block)
+	{
+		return String.format("%d;%d;%d", block.getX(), block.getY(), block.getZ());
 	}
 	
 	public Player getCreator()
