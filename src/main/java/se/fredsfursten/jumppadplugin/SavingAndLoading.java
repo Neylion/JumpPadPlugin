@@ -25,6 +25,7 @@ public class SavingAndLoading {
 		oos.flush();
 		oos.close();
 	}
+	
 	public static <T extends Object> T load(String path) throws Exception
 	{
 		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path));

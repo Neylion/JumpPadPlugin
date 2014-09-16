@@ -11,8 +11,12 @@ import org.bukkit.util.Vector;
 
 class JumpPadStorage implements Serializable {
 	private static final long serialVersionUID = 1L;
-	private Vector velocity;
-	private Vector location;
+	private double velocityX;
+	private double velocityY;
+	private double velocityZ;
+	private double locationX;
+	private double locationY;
+	private double locationZ;
 	private UUID worldId;
 	private String name;
 	private UUID playerId;
@@ -20,9 +24,13 @@ class JumpPadStorage implements Serializable {
 	public JumpPadStorage(String name, Location location, Vector velocity, Player player)
 	{
 		this.name = name;
-		this.location = new Vector(location.getX(), location.getY(), location.getZ());
+		this.locationX =location.getX();
+		this.locationY = location.getY();
+		this.locationZ = location.getZ();
 		this.worldId = location.getWorld().getUID();
-		this.velocity = velocity.clone();
+		this.velocityX = velocity.getX();
+		this.velocityY = velocity.getY();
+		this.velocityZ = velocity.getZ();
 		this.playerId = player.getUniqueId();
 	}
 	
@@ -38,7 +46,12 @@ class JumpPadStorage implements Serializable {
 	
 	public Location getLocation()
 	{
-		return new Location(getWorld(), this.location.getX(), this.location.getY(), this.location.getZ());
+		return new Location(getWorld(), this.locationX, this.locationY, this.locationZ);
+	}
+	
+	public Vector getVelocity()
+	{
+		return new Vector(this.velocityX, this.velocityY, this.velocityZ);
 	}
 	
 	public Player getPlayer()
@@ -48,6 +61,6 @@ class JumpPadStorage implements Serializable {
 	
 	public JumpPadInfo getJumpPadInfo()
 	{
-		return new JumpPadInfo(this.name, getLocation(), this.velocity, getPlayer());
+		return new JumpPadInfo(this.name, getLocation(), getVelocity(), getPlayer());
 	}
 }
