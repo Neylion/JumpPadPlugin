@@ -4,6 +4,10 @@ A JumpPad plugin for Minecraft
 
 ## Release history
 
+### JumpStraightUp
+
+* CHANGE: The player now jumps straight up, before being sent off with forward velocity.
+
 ### develop
 
 * BUG: The player was not nudged off the ground before the jump

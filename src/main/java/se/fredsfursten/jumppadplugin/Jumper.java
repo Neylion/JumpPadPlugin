@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -19,6 +21,7 @@ public class Jumper implements Listener {
 	private HashMap<String, JumpPadInfo> _jumpPadsByName = null;
 	private HashMap<Player, Player> _informedPlayers = null;
 	private HashMap<Player, Player> _noJumpPlayers = null;
+	private HashMap<Player, JumpPadInfo> _inAirPlayers = null;
 	private JavaPlugin _plugin = null;
 
 	private Jumper() {
@@ -39,6 +42,7 @@ public class Jumper implements Listener {
 		_jumpPadsByName = new HashMap<String, JumpPadInfo>();
 		_informedPlayers = new HashMap<Player, Player>();
 		_noJumpPlayers = new HashMap<Player, Player>();
+		_inAirPlayers = new HashMap<Player, JumpPadInfo>();
 
 		ArrayList<JumpPadStorage> jumpPadStorageList;
 		try {
@@ -74,7 +78,7 @@ public class Jumper implements Listener {
 		this._plugin.getLogger().info(String.format("Saved %d JumpPads", jumpPadStorageList.size()));
 	}
 
-	public void maybeJump(Player player, Location location) {
+	public void maybeJumpUp(Player player, Location location) {
 		JumpPadInfo info = findJumpPadInfo(location);
 		if (info == null) {
 			forgetThatWeToldPlayerAboutTheRules(player);
@@ -87,9 +91,19 @@ public class Jumper implements Listener {
 		}
 		if (_noJumpPlayers.containsKey(player)) return;
 		
-		// Nudge the player off the ground to always have no friction (being in the air)
-		player.teleport(player.getLocation().add(0.0,0.01,0.0));
-		player.setVelocity(info.getVelocity());
+		Vector upwards = new Vector(0.0, info.getVelocity().getY(), 0.0);
+		player.setVelocity(upwards);
+		_inAirPlayers.put(player, info);
+	}
+
+	public boolean maybeShootForward(Player player, Location from, Location to) {
+		if (!_inAirPlayers.containsKey(player)) return false;
+		if (to.getY() >= from.getY()) return false;
+		JumpPadInfo info = _inAirPlayers.get(player);
+		_inAirPlayers.remove(player);
+		Vector velocity = new Vector(info.getVelocity().getX(), player.getVelocity().getY(), info.getVelocity().getZ());
+		player.setVelocity(velocity);
+		return true;
 	}
 
 	private boolean hasReadRules(Player player) {

@@ -12,7 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import se.fredsfursten.jumppadplugin.Jumper;
 
 public final class JumpPadPlugin extends JavaPlugin implements Listener {
-	
+
 	@Override
 	public void onEnable() {
 		getLogger().info("onEnable has been invoked!");
@@ -28,14 +28,16 @@ public final class JumpPadPlugin extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void maybeJump(PlayerMoveEvent event) {
-	    Jumper.get().maybeJump(event.getPlayer(), event.getTo());
+		if (!Jumper.get().maybeShootForward(event.getPlayer(), event.getFrom(), event.getTo())) {
+			Jumper.get().maybeJumpUp(event.getPlayer(), event.getTo());
+		}
 	}
-	
+
 	@EventHandler
 	public void listenToCommands(PlayerCommandPreprocessEvent event) {
 		Jumper.get().listenToCommands(event.getPlayer(), event.getMessage());
 	}
-	
+
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (!(sender instanceof Player)) {
