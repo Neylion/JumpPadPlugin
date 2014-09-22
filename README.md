@@ -7,6 +7,7 @@ A JumpPad plugin for Minecraft
 ### develop
 
 * BUG: The player was not nudged off the ground before the jump
+* CHANGE: The command edit now requires the player to be on a jumppad first.
 
 ### 1.0.1 (2014-09-16)
 
