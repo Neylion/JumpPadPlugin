@@ -93,7 +93,6 @@ public class Jumper implements Listener {
 		
 		Vector upwards = new Vector(0.0, info.getVelocity().getY(), 0.0);
 		player.setVelocity(upwards);
-		player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 100000, 2));
 		_inAirPlayers.put(player, info);
 	}
 
@@ -104,7 +103,6 @@ public class Jumper implements Listener {
 		_inAirPlayers.remove(player);
 		Vector velocity = new Vector(info.getVelocity().getX(), player.getVelocity().getY(), info.getVelocity().getZ());
 		player.setVelocity(velocity);
-		player.removePotionEffect(PotionEffectType.WATER_BREATHING);
 		return true;
 	}
 
