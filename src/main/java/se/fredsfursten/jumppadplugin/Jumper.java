@@ -191,35 +191,41 @@ public class Jumper implements Listener {
 	public boolean editCommand(Player player, String[] args)
 	{
 		if (!hasMandatoryPermission(player, "jumppad.edit")) return true;
-		if ((args.length < 3) || (args.length > 4)) {
-			player.sendMessage("/jumppad edit <name> <up speed> [<forward speed>]");
+		JumpPadInfo info = findJumpPadInfo(player.getLocation());
+		if (info == null) {
+			player.sendMessage("You must go to a jumppad before you edit the jumppad. Use /jumppad goto <name>.");	
 			return true;
 		}
+		if ((args.length < 2) || (args.length > 3)) {
+			player.sendMessage("/jumppad edit <up speed> [<forward speed>]");
+			return true;
+		}	
 
-		String name = args[1];
-		JumpPadInfo info = findJumpPadByName(player, name);
-		if (info == null)
-		{
-			player.sendMessage("Unknown jumppad: " + name);
-			return true;			
-		}		
+		
 
-		String upSpeed = args[2];
+		Location location;
+		Vector velocityVector;
+		String upSpeed = args[1];
 		String forwardSpeed = "0.0";
-		if (args.length > 3)
+		if (args.length > 2)
 		{
-			forwardSpeed = args[3];
+			forwardSpeed = args[2];
 		}
-
+		
 		try {
-			Vector velocityVector = convertToVelocityVector(info.getLocation(), Double.parseDouble(upSpeed), Double.parseDouble(forwardSpeed));
-			JumpPadInfo newInfo = new JumpPadInfo(name, info.getLocation(), velocityVector, player.getUniqueId(), player.getName());
-			_jumpPadsByBlock.put(newInfo.getBlockHash(), newInfo);
-			_jumpPadsByName.put(newInfo.getName(), newInfo);
+			location = player.getLocation();
+			velocityVector = convertToVelocityVector(location, Double.parseDouble(upSpeed), Double.parseDouble(forwardSpeed));
+		} catch (Exception e) {
+			player.sendMessage("/jumppad edit <up speed> [<forward speed>]");
+			return true;
+		}
+		try {
+			JumpPadInfo newInfo = new JumpPadInfo(info.getName(), location, velocityVector, player.getUniqueId(), player.getName());
+			addInfo(player, newInfo);
 			return true;
 		} catch (Exception e) {
-			player.sendMessage("/jumppad edit <name> <up speed> [<forward speed>]");
-			return true;
+			e.printStackTrace();
+			return false;
 		}
 	}
 
