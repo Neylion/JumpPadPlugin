@@ -98,7 +98,7 @@ public class Jumper implements Listener {
 
 	public boolean maybeShootForward(Player player, Location from, Location to) {
 		if (!_inAirPlayers.containsKey(player)) return false;
-		if (to.getY() > from.getY()) return false;
+		if (to.getY() >= from.getY()) return false;
 		JumpPadInfo info = _inAirPlayers.get(player);
 		_inAirPlayers.remove(player);
 		Vector velocity = new Vector(info.getVelocity().getX(), player.getVelocity().getY(), info.getVelocity().getZ());
