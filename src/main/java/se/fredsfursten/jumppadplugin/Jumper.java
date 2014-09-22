@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -19,6 +21,7 @@ public class Jumper implements Listener {
 	private HashMap<String, JumpPadInfo> _jumpPadsByName = null;
 	private HashMap<Player, Player> _informedPlayers = null;
 	private HashMap<Player, Player> _noJumpPlayers = null;
+	private HashMap<Player, JumpPadInfo> _inAirPlayers = null;
 	private JavaPlugin _plugin = null;
 
 	private Jumper() {
@@ -39,6 +42,7 @@ public class Jumper implements Listener {
 		_jumpPadsByName = new HashMap<String, JumpPadInfo>();
 		_informedPlayers = new HashMap<Player, Player>();
 		_noJumpPlayers = new HashMap<Player, Player>();
+		_inAirPlayers = new HashMap<Player, JumpPadInfo>();
 
 		ArrayList<JumpPadStorage> jumpPadStorageList;
 		try {
@@ -74,7 +78,7 @@ public class Jumper implements Listener {
 		this._plugin.getLogger().info(String.format("Saved %d JumpPads", jumpPadStorageList.size()));
 	}
 
-	public void maybeJump(Player player, Location location) {
+	public void maybeJumpUp(Player player, Location location) {
 		JumpPadInfo info = findJumpPadInfo(location);
 		if (info == null) {
 			forgetThatWeToldPlayerAboutTheRules(player);
@@ -86,10 +90,20 @@ public class Jumper implements Listener {
 			return;
 		}
 		if (_noJumpPlayers.containsKey(player)) return;
-		// Nudge the player off the ground to always have no friction (being in the air)
 		
-		player.teleport(player.getLocation());//.add(0.0,0.001,0.0));
-		player.setVelocity(info.getVelocity());
+		Vector upwards = new Vector(0.0, info.getVelocity().getY(), 0.0);
+		player.setVelocity(upwards);
+		_inAirPlayers.put(player, info);
+	}
+
+	public boolean maybeShootForward(Player player, Location from, Location to) {
+		if (!_inAirPlayers.containsKey(player)) return false;
+		if (to.getY() >= from.getY()) return false;
+		JumpPadInfo info = _inAirPlayers.get(player);
+		_inAirPlayers.remove(player);
+		Vector velocity = new Vector(info.getVelocity().getX(), player.getVelocity().getY(), info.getVelocity().getZ());
+		player.setVelocity(velocity);
+		return true;
 	}
 
 	private boolean hasReadRules(Player player) {
@@ -175,35 +189,41 @@ public class Jumper implements Listener {
 	public boolean editCommand(Player player, String[] args)
 	{
 		if (!hasMandatoryPermission(player, "jumppad.edit")) return true;
-		if ((args.length < 3) || (args.length > 4)) {
-			player.sendMessage("/jumppad edit <name> <up speed> [<forward speed>]");
+		JumpPadInfo info = findJumpPadInfo(player.getLocation());
+		if (info == null) {
+			player.sendMessage("You must go to a jumppad before you edit the jumppad. Use /jumppad goto <name>.");	
 			return true;
 		}
+		if ((args.length < 2) || (args.length > 3)) {
+			player.sendMessage("/jumppad edit <up speed> [<forward speed>]");
+			return true;
+		}	
 
-		String name = args[1];
-		JumpPadInfo info = findJumpPadByName(player, name);
-		if (info == null)
-		{
-			player.sendMessage("Unknown jumppad: " + name);
-			return true;			
-		}		
+		
 
-		String upSpeed = args[2];
+		Location location;
+		Vector velocityVector;
+		String upSpeed = args[1];
 		String forwardSpeed = "0.0";
-		if (args.length > 3)
+		if (args.length > 2)
 		{
-			forwardSpeed = args[3];
+			forwardSpeed = args[2];
 		}
-
+		
 		try {
-			Vector velocityVector = convertToVelocityVector(info.getLocation(), Double.parseDouble(upSpeed), Double.parseDouble(forwardSpeed));
-			JumpPadInfo newInfo = new JumpPadInfo(name, info.getLocation(), velocityVector, player.getUniqueId(), player.getName());
-			_jumpPadsByBlock.put(newInfo.getBlockHash(), newInfo);
-			_jumpPadsByName.put(newInfo.getName(), newInfo);
+			location = player.getLocation();
+			velocityVector = convertToVelocityVector(location, Double.parseDouble(upSpeed), Double.parseDouble(forwardSpeed));
+		} catch (Exception e) {
+			player.sendMessage("/jumppad edit <up speed> [<forward speed>]");
+			return true;
+		}
+		try {
+			JumpPadInfo newInfo = new JumpPadInfo(info.getName(), location, velocityVector, player.getUniqueId(), player.getName());
+			addInfo(player, newInfo);
 			return true;
 		} catch (Exception e) {
-			player.sendMessage("/jumppad edit <name> <up speed> [<forward speed>]");
-			return true;
+			e.printStackTrace();
+			return false;
 		}
 	}
 
