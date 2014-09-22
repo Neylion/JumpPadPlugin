@@ -4,7 +4,7 @@ A JumpPad plugin for Minecraft
 
 ## Release history
 
-### develop
+### 1.1 (2014-09-22)
 
 * CHANGE: The command edit now requires the player to be on a jumppad first.
 * CHANGE: The player now jumps straight up, before being sent off with forward velocity.
