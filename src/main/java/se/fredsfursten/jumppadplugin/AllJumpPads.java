@@ -59,14 +59,14 @@ public class AllJumpPads implements Listener {
 		_jumpPadsByBlock = new HashMap<String, JumpPadInfo>();
 		_jumpPadsByName = new HashMap<String, JumpPadInfo>();
 
-		ArrayList<JumpPadStorage> jumpPadStorageList = loadData(plugin);
+		ArrayList<StorageModel> jumpPadStorageList = loadData(plugin);
 		if (jumpPadStorageList == null) return;
 		rememberAllData(jumpPadStorageList);
 		this._plugin.getLogger().info(String.format("Loaded %d JumpPads", jumpPadStorageList.size()));
 	}
 
-	private ArrayList<JumpPadStorage> loadData(JavaPlugin plugin) {
-		ArrayList<JumpPadStorage> jumpPadStorageList = null;
+	private ArrayList<StorageModel> loadData(JavaPlugin plugin) {
+		ArrayList<StorageModel> jumpPadStorageList = null;
 		try {
 			jumpPadStorageList = SavingAndLoading.load(FILE_PATH);
 		} catch (FileNotFoundException e) {
@@ -80,14 +80,14 @@ public class AllJumpPads implements Listener {
 		return jumpPadStorageList;
 	}
 
-	private void rememberAllData(ArrayList<JumpPadStorage> jumpPadStorageList) {
-		for (JumpPadStorage jumpPadStorage : jumpPadStorageList) {
-			this.add(jumpPadStorage.getJumpPadInfo());
+	private void rememberAllData(ArrayList<StorageModel> storageModelList) {
+		for (StorageModel storageModel : storageModelList) {
+			this.add(JumpPadInfo.createJumpPadInfo(storageModel));
 		}
 	}
 
 	void save() {
-		ArrayList<JumpPadStorage> jumpPadStorageList = getAllData();
+		ArrayList<StorageModel> jumpPadStorageList = getAllData();
 		boolean success = saveData(jumpPadStorageList);
 		if (success) {
 			this._plugin.getLogger().info(String.format("Saved %d JumpPads", jumpPadStorageList.size()));
@@ -96,15 +96,15 @@ public class AllJumpPads implements Listener {
 		}
 	}
 
-	private ArrayList<JumpPadStorage> getAllData() {
-		ArrayList<JumpPadStorage> jumpPadStorageList = new ArrayList<JumpPadStorage>();
+	private ArrayList<StorageModel> getAllData() {
+		ArrayList<StorageModel> jumpPadStorageList = new ArrayList<StorageModel>();
 		for (JumpPadInfo jumpPadInfo : getAll()) {
-			jumpPadStorageList.add(new JumpPadStorage(jumpPadInfo));
+			jumpPadStorageList.add(jumpPadInfo.getStorageModel());
 		}
 		return jumpPadStorageList;
 	}
 
-	private boolean saveData(ArrayList<JumpPadStorage> jumpPadStorageList) {
+	private boolean saveData(ArrayList<StorageModel> jumpPadStorageList) {
 		try {
 			SavingAndLoading.save(jumpPadStorageList, FILE_PATH);
 		} catch (Exception e) {

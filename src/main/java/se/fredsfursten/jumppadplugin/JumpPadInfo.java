@@ -24,6 +24,12 @@ class JumpPadInfo {
 		this.creatorName = creatorName;
 	}
 	
+	public static JumpPadInfo createJumpPadInfo(StorageModel storageModel)
+	{
+		Player creator = storageModel.getCreator();
+		return new JumpPadInfo(storageModel.getName(), storageModel.getLocation(), storageModel.getVelocity(), creator.getUniqueId(), creator.getName());
+	}
+	
 	Vector getVelocity() {
 		return this.velocity;
 	}
@@ -61,6 +67,11 @@ class JumpPadInfo {
 	
 	UUID getCreatorId() {
 		return this.creatorId;
+	}
+
+	StorageModel getStorageModel() {
+		return new StorageModel(getName(), getLocation().getBlock(), getVelocity(), getCreatorId(), getCreatorName());
+
 	}
 
 	public String toString() {
