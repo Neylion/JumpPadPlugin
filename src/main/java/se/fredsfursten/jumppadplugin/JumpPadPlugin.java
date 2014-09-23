@@ -17,13 +17,13 @@ public final class JumpPadPlugin extends JavaPlugin implements Listener {
 	public void onEnable() {
 		getLogger().info("onEnable has been invoked!");
 		getServer().getPluginManager().registerEvents(this, this);		
-		Jumper.get().load(this);
+		Jumper.get().enable(this);
 	}
 
 	@Override
 	public void onDisable() {
 		getLogger().info("onDisable has been invoked!");
-		Jumper.get().save();
+		Jumper.get().disable();
 	}
 
 	@EventHandler
@@ -53,18 +53,19 @@ public final class JumpPadPlugin extends JavaPlugin implements Listener {
 
 		String command = args[0].toLowerCase();
 		if (command.equals("add")) {
-			return Jumper.get().addCommand(player, args);
+			Jumper.get().addCommand(player, args);
 		} else if (command.equals("remove")) {
-			return Jumper.get().removeCommand(player, args);
+			Jumper.get().removeCommand(player, args);
 		} else if (command.equals("edit")) {
-			return Jumper.get().editCommand(player, args);
+			Jumper.get().editCommand(player, args);
 		} else if (command.equals("list")) {
-			return Jumper.get().listCommand(player);
+			Jumper.get().listCommand(player);
 		} else if (command.equals("goto")) {
-			return Jumper.get().gotoCommand(player, args);
+			Jumper.get().gotoCommand(player, args);
 		} else {
 			sender.sendMessage("Could not understand command.");
 			return false;
 		}
+		return true;
 	}
 }
