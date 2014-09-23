@@ -15,15 +15,15 @@ public final class JumpPadPlugin extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
-		getLogger().info("onEnable has been invoked!");
 		getServer().getPluginManager().registerEvents(this, this);		
-		Jumper.get().enable(this);
+		Jumper.get().enable();
+		Commands.get().enable(this);
 	}
 
 	@Override
 	public void onDisable() {
-		getLogger().info("onDisable has been invoked!");
 		Jumper.get().disable();
+		Commands.get().disable();
 	}
 
 	@EventHandler
@@ -35,7 +35,7 @@ public final class JumpPadPlugin extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void listenToCommands(PlayerCommandPreprocessEvent event) {
-		Jumper.get().listenToCommands(event.getPlayer(), event.getMessage());
+		Commands.get().listenToCommands(event.getPlayer(), event.getMessage());
 	}
 
 	@Override
@@ -53,15 +53,15 @@ public final class JumpPadPlugin extends JavaPlugin implements Listener {
 
 		String command = args[0].toLowerCase();
 		if (command.equals("add")) {
-			Jumper.get().addCommand(player, args);
+			Commands.get().addCommand(player, args);
 		} else if (command.equals("remove")) {
-			Jumper.get().removeCommand(player, args);
+			Commands.get().removeCommand(player, args);
 		} else if (command.equals("edit")) {
-			Jumper.get().editCommand(player, args);
+			Commands.get().editCommand(player, args);
 		} else if (command.equals("list")) {
-			Jumper.get().listCommand(player);
+			Commands.get().listCommand(player);
 		} else if (command.equals("goto")) {
-			Jumper.get().gotoCommand(player, args);
+			Commands.get().gotoCommand(player, args);
 		} else {
 			sender.sendMessage("Could not understand command.");
 			return false;
