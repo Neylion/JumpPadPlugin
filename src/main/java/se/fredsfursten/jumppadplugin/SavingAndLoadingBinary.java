@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-public class SavingAndLoading {
+public class SavingAndLoadingBinary {
 	public static <T extends Object> void save(T obj,String path) throws Exception
 	{
 		File file = new File(path);

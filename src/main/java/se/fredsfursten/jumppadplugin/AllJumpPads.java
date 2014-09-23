@@ -68,7 +68,7 @@ public class AllJumpPads implements Listener {
 	private ArrayList<StorageModel> loadData(JavaPlugin plugin) {
 		ArrayList<StorageModel> jumpPadStorageList = null;
 		try {
-			jumpPadStorageList = SavingAndLoading.load(FILE_PATH);
+			jumpPadStorageList = SavingAndLoadingBinary.load(FILE_PATH);
 		} catch (FileNotFoundException e) {
 			plugin.getLogger().info("No jump pad data file found.");
 			return null;
@@ -106,7 +106,7 @@ public class AllJumpPads implements Listener {
 
 	private boolean saveData(ArrayList<StorageModel> jumpPadStorageList) {
 		try {
-			SavingAndLoading.save(jumpPadStorageList, FILE_PATH);
+			SavingAndLoadingBinary.save(jumpPadStorageList, FILE_PATH);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
