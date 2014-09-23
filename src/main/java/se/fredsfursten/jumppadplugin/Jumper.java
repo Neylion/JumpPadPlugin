@@ -13,18 +13,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
 public class Jumper implements Listener {
-	private static final String FILE_PATH = "plugins/JumpPad/jumppad_locations.bin";
 	private static Jumper singleton = null;
 	static String rulesCommand = "/rules";
 
-	private HashMap<String, JumpPadInfo> _jumpPadsByBlock = null;
-	private HashMap<String, JumpPadInfo> _jumpPadsByName = null;
 	private HashMap<Player, Player> _informedPlayers = null;
 	private HashMap<Player, Player> _noJumpPlayers = null;
 	private HashMap<Player, JumpPadInfo> _inAirPlayers = null;
 	private JavaPlugin _plugin = null;
+	private AllJumpPads _allJumpPads = null;
 
 	private Jumper() {
+		_allJumpPads = AllJumpPads.get();
 	}
 
 	public static Jumper get()
@@ -38,48 +37,19 @@ public class Jumper implements Listener {
 	public void load(JavaPlugin plugin){
 		_plugin = plugin;
 
-		_jumpPadsByBlock = new HashMap<String, JumpPadInfo>();
-		_jumpPadsByName = new HashMap<String, JumpPadInfo>();
 		_informedPlayers = new HashMap<Player, Player>();
 		_noJumpPlayers = new HashMap<Player, Player>();
 		_inAirPlayers = new HashMap<Player, JumpPadInfo>();
-
-		ArrayList<JumpPadStorage> jumpPadStorageList;
-		try {
-			jumpPadStorageList = SavingAndLoading.load(FILE_PATH);
-		} catch (FileNotFoundException e) {
-			plugin.getLogger().info("No jump pad data found.");
-			return;
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			plugin.getLogger().info("Failed to load data.");
-			return;
-		}
-		for (JumpPadStorage jumpPadStorage : jumpPadStorageList) {
-			this.addInfo(null, jumpPadStorage.getJumpPadInfo());
-		}
-		this._plugin.getLogger().info(String.format("Loaded %d JumpPads", jumpPadStorageList.size()));
+		
+		_allJumpPads.load(plugin);
 	}
 
 	public void save() {
-		ArrayList<JumpPadStorage> jumpPadStorageList = new ArrayList<JumpPadStorage>();
-		for (JumpPadInfo jumpPadInfo : _jumpPadsByBlock.values()) {
-			jumpPadStorageList.add(new JumpPadStorage(jumpPadInfo));
-		}
-		try {
-			SavingAndLoading.save(jumpPadStorageList, FILE_PATH);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			this._plugin.getLogger().info("Failed to save data.");
-			return;
-		}
-		this._plugin.getLogger().info(String.format("Saved %d JumpPads", jumpPadStorageList.size()));
+		_allJumpPads.save();
 	}
 
 	public void maybeJumpUp(Player player, Location location) {
-		JumpPadInfo info = findJumpPadInfo(location);
+		JumpPadInfo info = _allJumpPads.getByLocation(location);
 		if (info == null) {
 			forgetThatWeToldPlayerAboutTheRules(player);
 			forgetNoJumpPlayer(player);
@@ -129,13 +99,6 @@ public class Jumper implements Listener {
 		}
 	}
 
-	private JumpPadInfo findJumpPadInfo(Location currentLocation) {
-		if (_jumpPadsByBlock == null) return null;
-		String position = JumpPadInfo.toBlockHash(currentLocation);
-		if (!_jumpPadsByBlock.containsKey(position)) return null;
-		return _jumpPadsByBlock.get(position);
-	}
-
 	public boolean addCommand(Player player, String[] args)
 	{
 		if (!hasMandatoryPermission(player, "jumppad.add")) return true;
@@ -145,7 +108,7 @@ public class Jumper implements Listener {
 		}
 
 		String name = args[1];
-		JumpPadInfo info = findJumpPadByName(player, name);
+		JumpPadInfo info = _allJumpPads.getByName(name);
 		if (info != null)
 		{
 			player.sendMessage("Jumppad already exists: " + name);
@@ -170,7 +133,10 @@ public class Jumper implements Listener {
 		}
 		try {
 			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player.getUniqueId(), player.getName());
-			addInfo(player, newInfo);
+			_allJumpPads.add(newInfo);
+			if (player != null) {
+				_noJumpPlayers.put(player, player);
+			}
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -178,18 +144,10 @@ public class Jumper implements Listener {
 		}
 	}
 
-	private void addInfo(Player player, JumpPadInfo newInfo) {
-		_jumpPadsByBlock.put(newInfo.getBlockHash(), newInfo);
-		_jumpPadsByName.put(newInfo.getName(), newInfo);
-		if (player != null) {
-			_noJumpPlayers.put(player, player);
-		}
-	}
-
 	public boolean editCommand(Player player, String[] args)
 	{
 		if (!hasMandatoryPermission(player, "jumppad.edit")) return true;
-		JumpPadInfo info = findJumpPadInfo(player.getLocation());
+		JumpPadInfo info = _allJumpPads.getByLocation(player.getLocation());
 		if (info == null) {
 			player.sendMessage("You must go to a jumppad before you edit the jumppad. Use /jumppad goto <name>.");	
 			return true;
@@ -219,7 +177,10 @@ public class Jumper implements Listener {
 		}
 		try {
 			JumpPadInfo newInfo = new JumpPadInfo(info.getName(), location, velocityVector, player.getUniqueId(), player.getName());
-			addInfo(player, newInfo);
+			_allJumpPads.add(newInfo);
+			if (player != null) {
+				_noJumpPlayers.put(player, player);
+			}
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -245,14 +206,13 @@ public class Jumper implements Listener {
 			return true;
 		}
 		String name = args[1];
-		JumpPadInfo info = findJumpPadByName(player, name);
+		JumpPadInfo info = _allJumpPads.getByName(name);
 		if (info == null)
 		{
 			player.sendMessage("Unknown jumppad: " + name);
 			return true;			
 		}
-		_jumpPadsByName.remove(name);
-		_jumpPadsByBlock.remove(info.getBlockHash());
+		_allJumpPads.remove(info);
 		return true;
 	}
 
@@ -264,7 +224,7 @@ public class Jumper implements Listener {
 			return true;
 		}
 		String name = args[1];
-		JumpPadInfo info = findJumpPadByName(player, name);
+		JumpPadInfo info = _allJumpPads.getByName(name);
 		if (info == null)
 		{
 			player.sendMessage("Unknown jumppad: " + name);
@@ -280,15 +240,10 @@ public class Jumper implements Listener {
 		if (!hasMandatoryPermission(player, "jumppad.list")) return true;
 
 		player.sendMessage("Jump pads:");
-		for (JumpPadInfo info : _jumpPadsByName.values()) {
+		for (JumpPadInfo info : _allJumpPads.getAll()) {
 			player.sendMessage(String.format("%s (%s)", info.getName(), info.getCreatorName()));
 		}
 		return true;
-	}
-
-	private JumpPadInfo findJumpPadByName(Player player, String name) {
-		if (!_jumpPadsByName.containsKey(name)) return null;
-		return _jumpPadsByName.get(name);
 	}
 
 	private boolean hasMandatoryPermission(Player player, String permission)
