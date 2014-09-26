@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>se.fredsfursten</groupId>
   <artifactId>JumpPadPlugin</artifactId>
-  <version>1.1.1-develop</version>
+  <version>1.2</version>
   <name>JumpPadPlugin</name>
   <build>
       <plugins>
