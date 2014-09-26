@@ -15,7 +15,7 @@ class JumpPadInfo {
 	private UUID creatorId;
 	private String creatorName;
 	
-	public JumpPadInfo(String name, Location location, Vector velocity, UUID creatorId, String creatorName)
+	JumpPadInfo(String name, Location location, Vector velocity, UUID creatorId, String creatorName)
 	{
 		this.velocity = velocity;
 		this.name = name;
@@ -24,42 +24,57 @@ class JumpPadInfo {
 		this.creatorName = creatorName;
 	}
 	
-	public Vector getVelocity() {
+	public static JumpPadInfo createJumpPadInfo(StorageModel storageModel)
+	{
+		Player creator = storageModel.getCreator();
+		return new JumpPadInfo(storageModel.getName(), storageModel.getLocation(), storageModel.getVelocity(), creator.getUniqueId(), creator.getName());
+	}
+	
+	Vector getVelocity() {
 		return this.velocity;
 	}
 	
-	public String getName() {
+	String getName() {
 		return this.name;
 	}
 	
-	public Location getLocation() {
+	Location getLocation() {
 		return this.location;
 	}
 	
-	public String getBlockHash() {
+	String getBlockHash() {
 		return JumpPadInfo.toBlockHash(this.location);
 	}
 
-	public static String toBlockHash(Location location)
+	static String toBlockHash(Location location)
 	{
 		return toBlockHash(location.getBlock());
 	}
 
-	public static String toBlockHash(Block block)
+	static String toBlockHash(Block block)
 	{
 		return String.format("%d;%d;%d", block.getX(), block.getY(), block.getZ());
 	}
 	
-	public Player getCreator()
+	Player getCreator()
 	{
 		return Bukkit.getServer().getPlayer(this.creatorId);
 	}
 	
-	public String getCreatorName() {
+	String getCreatorName() {
 		return this.creatorName;
 	}
 	
-	public UUID getCreatorId() {
+	UUID getCreatorId() {
 		return this.creatorId;
+	}
+
+	StorageModel getStorageModel() {
+		return new StorageModel(getName(), getLocation().getBlock(), getVelocity(), getCreatorId(), getCreatorName());
+
+	}
+
+	public String toString() {
+		return String.format("%s (%s): from %s with velocity %s", getName(), getCreatorName(), getLocation().getBlock().toString(), getVelocity().toString());
 	}
 }

@@ -10,7 +10,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-class JumpPadStorage implements Serializable {
+class StorageModel implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private double velocityX;
 	private double velocityY;
@@ -23,7 +23,7 @@ class JumpPadStorage implements Serializable {
 	private UUID creatorId;
 	private String creatorName;
 	
-	public JumpPadStorage(String name, Block block, Vector velocity, UUID creatorId, String creatorName)
+	public StorageModel(String name, Block block, Vector velocity, UUID creatorId, String creatorName)
 	{
 		this.name = name;
 		this.blockX =block.getX();
@@ -35,16 +35,11 @@ class JumpPadStorage implements Serializable {
 		this.velocityZ = velocity.getZ();
 		this.creatorId = creatorId;
 		this.creatorName = creatorName;
-		
-		Player creator = getCreator();
-		if (creator != null){
-			this.creatorName = creator.getName();
-		}
 	}
 	
-	public JumpPadStorage(JumpPadInfo jumpPadInfo)
+	public String getName()
 	{
-		this(jumpPadInfo.getName(), jumpPadInfo.getLocation().getBlock(), jumpPadInfo.getVelocity(), jumpPadInfo.getCreatorId(), jumpPadInfo.getCreatorName());
+		return this.name;
 	}
 	
 	public World getWorld()
@@ -69,16 +64,16 @@ class JumpPadStorage implements Serializable {
 	
 	public Player getCreator()
 	{
-		return Bukkit.getServer().getPlayer(this.creatorId);
+		Player creator = Bukkit.getServer().getPlayer(this.creatorId);
+		return creator;
 	}
 	
-	public JumpPadInfo getJumpPadInfo()
+	public String getCreatorName()
 	{
 		Player creator = getCreator();
-		if (creator != null)
-		{
+		if (creator != null){
 			this.creatorName = creator.getName();
 		}
-		return new JumpPadInfo(this.name, getLocation(), getVelocity(), this.creatorId, this.creatorName);
+		return this.creatorName;
 	}
 }
