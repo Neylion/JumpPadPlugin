@@ -13,8 +13,8 @@ public class AllJumpPads implements Listener {
 	private static final String FILE_PATH = "plugins/JumpPad/jumppad_locations.bin";
 	private static AllJumpPads singleton = null;
 
-	private HashMap<String, JumpPadInfo> _jumpPadsByBlock = null;
-	private HashMap<String, JumpPadInfo> _jumpPadsByName = null;
+	private HashMap<String, JumpPadInfo> jumpPadsByBlock = null;
+	private HashMap<String, JumpPadInfo> jumpPadsByName = null;
 	private JavaPlugin _plugin = null;
 
 	private AllJumpPads() {
@@ -28,36 +28,36 @@ public class AllJumpPads implements Listener {
 	}
 
 	void add(JumpPadInfo info) {
-		_jumpPadsByBlock.put(info.getBlockHash(), info);
-		_jumpPadsByName.put(info.getName(), info);
+		this.jumpPadsByBlock.put(info.getBlockHash(), info);
+		this.jumpPadsByName.put(info.getName(), info);
 	}
 
 	void remove(JumpPadInfo info) {
-		_jumpPadsByName.remove(info.getName());
-		_jumpPadsByBlock.remove(info.getBlockHash());
+		this.jumpPadsByName.remove(info.getName());
+		this.jumpPadsByBlock.remove(info.getBlockHash());
 	}
 
 	Collection<JumpPadInfo> getAll() {
-		return _jumpPadsByName.values();
+		return this.jumpPadsByName.values();
 	}
 
 	JumpPadInfo getByLocation(Location location) {
-		if (_jumpPadsByBlock == null) return null;
+		if (this.jumpPadsByBlock == null) return null;
 		String position = JumpPadInfo.toBlockHash(location);
-		if (!_jumpPadsByBlock.containsKey(position)) return null;
-		return _jumpPadsByBlock.get(position);
+		if (!this.jumpPadsByBlock.containsKey(position)) return null;
+		return this.jumpPadsByBlock.get(position);
 	}
 
 	JumpPadInfo getByName(String name) {
-		if (!_jumpPadsByName.containsKey(name)) return null;
-		return _jumpPadsByName.get(name);
+		if (!this.jumpPadsByName.containsKey(name)) return null;
+		return this.jumpPadsByName.get(name);
 	}
 
 	void load(JavaPlugin plugin) {
-		_plugin = plugin;
+		this._plugin = plugin;
 
-		_jumpPadsByBlock = new HashMap<String, JumpPadInfo>();
-		_jumpPadsByName = new HashMap<String, JumpPadInfo>();
+		this.jumpPadsByBlock = new HashMap<String, JumpPadInfo>();
+		this.jumpPadsByName = new HashMap<String, JumpPadInfo>();
 
 		ArrayList<StorageModel> jumpPadStorageList = loadData(plugin);
 		if (jumpPadStorageList == null) return;

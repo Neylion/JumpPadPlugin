@@ -1,8 +1,33 @@
 # JumpPadPlugin
 
-A JumpPad plugin for Minecraft
+A JumpPad plugin for Minecraft.
+A JumpPad is a block that will throw away a user that steps on it in a certain direction.
+
+## Functionality
+
+The plugin provides administrative commands for handling JumpPads, a way of saving and loading the created JumpPads to/from file storage and implementing the actual launching of players that step on a JumpPad.
+
+### Administrative commands
+
+* add: Add a new named JumpPad located to the block where the user is currently positioned.
+* edit: Edit the parameters of an existing JumpPad
+* remove: Remove an existing JumpPad
+* goto: Teleport to an existing JumpPad, temporarily stops the JumpPad from working for this user, so that he/she is not thrown away immediately
+* list: Show a list with all existing JumpPads
+
+### The actual Jump
+
+When a user steps on a JumpPad, he/she will first be thrown up in the air (according to the parameters for that JumpPad). When the user has reached the maximum height, he/she is shot away (according to the parameters for that JumpPad) in the direction that the creator of the JumpPad was looking when the JumpPad was created.
+
+### Restrictions
+
+A player must have the "jumppad.jump" permission to use a JumpPad. If he/she doesn't, then he/she will be informed that she needs to read the server rules first.
 
 ## Release history
+
+### 1.2 (2014-09-26)
+
+* CHANGE: Updated to be compatible with Minecraft 1.8 and Spigot
 
 ### 1.1 (2014-09-22)
 

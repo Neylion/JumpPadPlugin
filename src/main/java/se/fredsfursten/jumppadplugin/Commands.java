@@ -14,11 +14,11 @@ public class Commands implements Listener {
 	private static final String EDIT_COMMAND = "/jumppad edit <up speed> [<forward speed>]";
 	private static final String RULES_COMMAND_BEGINNING = "/rules";
 
-	private JavaPlugin _plugin = null;
-	private AllJumpPads _allJumpPads = null;
+	private JavaPlugin plugin = null;
+	private AllJumpPads allJumpPads = null;
 
 	private Commands() {
-		_allJumpPads = AllJumpPads.get();
+		this.allJumpPads = AllJumpPads.get();
 	}
 
 	static Commands get()
@@ -30,12 +30,12 @@ public class Commands implements Listener {
 	}
 
 	void enable(JavaPlugin plugin){
-		_plugin = plugin;
-		_allJumpPads.load(plugin);
+		this.plugin = plugin;
+		this.allJumpPads.load(plugin);
 	}
 
 	void disable() {
-		_allJumpPads.save();
+		this.allJumpPads.save();
 	}
 
 	void addCommand(Player player, String[] args)
@@ -67,7 +67,7 @@ public class Commands implements Listener {
 	}
 
 	private boolean verifyNameIsNew(Player player, String name) {
-		JumpPadInfo info = _allJumpPads.getByName(name);
+		JumpPadInfo info = this.allJumpPads.getByName(name);
 		if (info != null)
 		{
 			player.sendMessage("Jumppad already exists: " + name);
@@ -83,7 +83,7 @@ public class Commands implements Listener {
 		velocityVector = convertToVelocityVector(location, upSpeed, forwardSpeed);
 		try {
 			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player.getUniqueId(), player.getName());
-			_allJumpPads.add(newInfo);
+			this.allJumpPads.add(newInfo);
 			if (player != null) {
 				Jumper.get().playerCanJump(player, false);
 			}
@@ -106,7 +106,7 @@ public class Commands implements Listener {
 	void editCommand(Player player, String[] args)
 	{
 		if (!verifyPermission(player, "jumppad.edit")) return;
-		JumpPadInfo info = _allJumpPads.getByLocation(player.getLocation());
+		JumpPadInfo info = this.allJumpPads.getByLocation(player.getLocation());
 		if (info == null) {
 			player.sendMessage("You must go to a jumppad before you edit the jumppad. Use /jumppad goto <name>.");	
 			return;
@@ -142,13 +142,13 @@ public class Commands implements Listener {
 			return;
 		}
 		String name = args[1];
-		JumpPadInfo info = _allJumpPads.getByName(name);
+		JumpPadInfo info = this.allJumpPads.getByName(name);
 		if (info == null)
 		{
 			player.sendMessage("Unknown jumppad: " + name);
 			return;	
 		}
-		_allJumpPads.remove(info);
+		this.allJumpPads.remove(info);
 	}
 
 	void gotoCommand(Player player, String[] args)
@@ -159,7 +159,7 @@ public class Commands implements Listener {
 			return;
 		}
 		String name = args[1];
-		JumpPadInfo info = _allJumpPads.getByName(name);
+		JumpPadInfo info = this.allJumpPads.getByName(name);
 		if (info == null)
 		{
 			player.sendMessage("Unknown jumppad: " + name);
@@ -175,7 +175,7 @@ public class Commands implements Listener {
 		if (!verifyPermission(player, "jumppad.list")) return;
 
 		player.sendMessage("Jump pads:");
-		for (JumpPadInfo info : _allJumpPads.getAll()) {
+		for (JumpPadInfo info : this.allJumpPads.getAll()) {
 			player.sendMessage(info.toString());
 		}
 	}
@@ -240,7 +240,7 @@ public class Commands implements Listener {
 		if (message.toLowerCase().startsWith(RULES_COMMAND_BEGINNING))
 		{
 			player.sendMessage("Getting permission");
-			player.addAttachment(_plugin, "jumppad.jump", true);
+			player.addAttachment(this.plugin, "jumppad.jump", true);
 		}
 	}
 
