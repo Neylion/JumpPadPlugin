@@ -11,13 +11,13 @@ import org.bukkit.util.Vector;
 public class Jumper implements Listener {
 	private static Jumper singleton = null;
 
-	private HashMap<UUID, UUID> _playersThatHasBeenInformedToReadTheRules = null;
-	private HashMap<UUID, JumpPadInfo> _playersInJumpUp = null;
-	private HashMap<UUID, UUID> _playersWithTemporaryJumpPause = null;
-	private AllJumpPads _allJumpPads = null;
+	private HashMap<UUID, UUID> playersThatHasBeenInformedToReadTheRules = null;
+	private HashMap<UUID, JumpPadInfo> playersInJumpUp = null;
+	private HashMap<UUID, UUID> playersWithTemporaryJumpPause = null;
+	private AllJumpPads allJumpPads = null;
 
 	private Jumper() {
-		_allJumpPads = AllJumpPads.get();
+		this.allJumpPads = AllJumpPads.get();
 	}
 
 	static Jumper get()
@@ -29,16 +29,16 @@ public class Jumper implements Listener {
 	}
 
 	void enable(){
-		_playersThatHasBeenInformedToReadTheRules = new HashMap<UUID, UUID>();
-		_playersWithTemporaryJumpPause = new HashMap<UUID, UUID>();
-		_playersInJumpUp = new HashMap<UUID, JumpPadInfo>();
+		this.playersThatHasBeenInformedToReadTheRules = new HashMap<UUID, UUID>();
+		this.playersWithTemporaryJumpPause = new HashMap<UUID, UUID>();
+		this.playersInJumpUp = new HashMap<UUID, JumpPadInfo>();
 	}
 
 	void disable() {
 	}
 
 	void maybeJumpUp(Player player, Location location) {
-		JumpPadInfo info = _allJumpPads.getByLocation(location);
+		JumpPadInfo info = this.allJumpPads.getByLocation(location);
 		if (info == null) {
 			mustReadRules(player, true);
 			playerCanJump(player, true);
@@ -56,7 +56,7 @@ public class Jumper implements Listener {
 	private void jumpUp(Player player, JumpPadInfo info) {
 		Vector upwards = new Vector(0.0, info.getVelocity().getY(), 0.0);
 		player.setVelocity(upwards);
-		_playersInJumpUp.put(player.getUniqueId(), info);
+		this.playersInJumpUp.put(player.getUniqueId(), info);
 	}
 
 	boolean maybeShootForward(Player player, Location from, Location to) {
@@ -71,8 +71,8 @@ public class Jumper implements Listener {
 	}
 
 	private void shootForward(Player player) {
-		JumpPadInfo info = _playersInJumpUp.get(player.getUniqueId());
-		_playersInJumpUp.remove(player.getUniqueId());
+		JumpPadInfo info = this.playersInJumpUp.get(player.getUniqueId());
+		this.playersInJumpUp.remove(player.getUniqueId());
 		Vector velocity = new Vector(info.getVelocity().getX(), player.getVelocity().getY(), info.getVelocity().getZ());
 		player.setVelocity(velocity);
 	}
@@ -87,11 +87,11 @@ public class Jumper implements Listener {
 	void playerCanJump(Player player, boolean canJump) {
 		if (canJump){
 			if (hasTemporaryJumpPause(player)) {
-				_playersWithTemporaryJumpPause.remove(player.getUniqueId());
+				this.playersWithTemporaryJumpPause.remove(player.getUniqueId());
 			}
 		} else {
 			if (!hasTemporaryJumpPause(player)) {
-				_playersWithTemporaryJumpPause.put(player.getUniqueId(), player.getUniqueId());
+				this.playersWithTemporaryJumpPause.put(player.getUniqueId(), player.getUniqueId());
 			}
 		}
 	}
@@ -99,21 +99,21 @@ public class Jumper implements Listener {
 	private void mustReadRules(Player player, boolean mustReadRules) {
 		if (mustReadRules) {
 			if (!shouldReadRules(player)) {
-				_playersThatHasBeenInformedToReadTheRules.put(player.getUniqueId(), player.getUniqueId());
+				this.playersThatHasBeenInformedToReadTheRules.put(player.getUniqueId(), player.getUniqueId());
 			}
 		} else {
 			if (shouldReadRules(player)) {
-				_playersThatHasBeenInformedToReadTheRules.remove(player.getUniqueId());
+				this.playersThatHasBeenInformedToReadTheRules.remove(player.getUniqueId());
 			}
 		}
 	}
 
 	private boolean shouldReadRules(Player player) {
-		return !_playersThatHasBeenInformedToReadTheRules.containsKey(player.getUniqueId());
+		return !this.playersThatHasBeenInformedToReadTheRules.containsKey(player.getUniqueId());
 	}
 
 	private boolean hasTemporaryJumpPause(Player player) {
-		return _playersWithTemporaryJumpPause.containsKey(player.getUniqueId());
+		return this.playersWithTemporaryJumpPause.containsKey(player.getUniqueId());
 	}
 
 	private boolean hasReadRules(Player player) {
@@ -121,6 +121,6 @@ public class Jumper implements Listener {
 	}
 
 	boolean isInAir(Player player) {
-		return _playersInJumpUp.containsKey(player.getUniqueId());
+		return this.playersInJumpUp.containsKey(player.getUniqueId());
 	}
 }
