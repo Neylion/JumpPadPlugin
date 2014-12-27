@@ -1,6 +1,6 @@
 name: JumpPadPlugin
 main: se.fredsfursten.jumppadplugin.JumpPadPlugin
-version: 0.1
+version: 1.2.1
 author: vanbrayne
 description: A Minecraft plugin for so called "Jump Pad" functionality
 commands:
