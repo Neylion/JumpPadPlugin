@@ -12,7 +12,7 @@ public class Jumper {
 	private static Jumper singleton = null;
 
 	private HashMap<UUID, UUID> playersThatHasBeenInformedToReadTheRules = null;
-	private HashMap<UUID, JumpPadInfo> playersInJumpUp = null;
+	private HashMap<UUID, JumpPadInfo> playersInJump = null;
 	private HashMap<UUID, UUID> playersWithTemporaryJumpPause = null;
 	private AllJumpPads allJumpPads = null;
 
@@ -31,50 +31,38 @@ public class Jumper {
 	void enable(){
 		this.playersThatHasBeenInformedToReadTheRules = new HashMap<UUID, UUID>();
 		this.playersWithTemporaryJumpPause = new HashMap<UUID, UUID>();
-		this.playersInJumpUp = new HashMap<UUID, JumpPadInfo>();
+		this.playersInJump = new HashMap<UUID, JumpPadInfo>();
 	}
 
 	void disable() {
 	}
 
-	void maybeJumpUp(Player player, Location location) {
+	void maybeJump(Player player, Location location) {
 		JumpPadInfo info = this.allJumpPads.getByLocation(location);
 		if (info == null) {
 			mustReadRules(player, true);
 			playerCanJump(player, true);
 			return;
 		}
+		
 		if (!hasReadRules(player)) {
 			maybeTellPlayerToReadTheRules(player);
 			return;
 		}
 		if (hasTemporaryJumpPause(player)) return;
 
-		jumpUp(player, info);
+		jump(player, info);
 	}
 
-	private void jumpUp(Player player, JumpPadInfo info) {
-		Vector upwards = new Vector(0.0, info.getVelocity().getY(), 0.0);
-		player.setVelocity(upwards);
-		this.playersInJumpUp.put(player.getUniqueId(), info);
-	}
-
-	boolean maybeShootForward(Player player, Location from, Location to) {
-		if (!isInAir(player)) return false;
-		if (!isGoingDown(from, to)) return false;
-		shootForward(player);
-		return true;
+	private void jump(Player player, JumpPadInfo info) {
+		this.playersInJump.put(player.getUniqueId(), info);
+		Vector jumpPadVelocity = info.getVelocity();
+		Vector velocity = new Vector(jumpPadVelocity.getX(), jumpPadVelocity.getY(), jumpPadVelocity.getZ());
+		player.setVelocity(velocity);
 	}
 
 	boolean isGoingDown(Location from, Location to) {
 		return to.getY() < from.getY();
-	}
-
-	private void shootForward(Player player) {
-		JumpPadInfo info = this.playersInJumpUp.get(player.getUniqueId());
-		this.playersInJumpUp.remove(player.getUniqueId());
-		Vector velocity = new Vector(info.getVelocity().getX(), player.getVelocity().getY(), info.getVelocity().getZ());
-		player.setVelocity(velocity);
 	}
 
 	private void maybeTellPlayerToReadTheRules(Player player) {
@@ -121,6 +109,16 @@ public class Jumper {
 	}
 
 	boolean isInAir(Player player) {
-		return this.playersInJumpUp.containsKey(player.getUniqueId());
+		return this.playersInJump.containsKey(player.getUniqueId());
+	}
+
+	public Vector getPlayerJumpPadVelocity(Player player, double yVelocity) {
+		JumpPadInfo info = this.playersInJump.get(player.getUniqueId());
+		if (info == null) return null;
+		if (yVelocity == 0.0) {
+			this.playersInJump.remove(player.getUniqueId());
+			return null;
+		}
+		return info.getVelocity();
 	}
 }
