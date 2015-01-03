@@ -29,7 +29,7 @@ A player must have the "jumppad.jump" permission to use a JumpPad. If he/she doe
 
 ## Release history
 
-### develop
+### 1.3 (2014-01-03)
 
 * CHANGE: Now jumps as an arc instead of first straigh up and then forward.
 * CHANGE: Removed "implements" for interfaces that were not implemented.
