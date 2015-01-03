@@ -18,7 +18,7 @@ public final class JumpPadPlugin extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable() {
 		getServer().getPluginManager().registerEvents(this, this);		
-		Jumper.get().enable();
+		Jumper.get().enable(this);
 		Commands.get().enable(this);
 	}
 
@@ -33,19 +33,10 @@ public final class JumpPadPlugin extends JavaPlugin implements Listener {
     	Jumper.get().maybeJump(event.getPlayer(), event.getTo());
 	}
 
-	@EventHandler
-	public void maybeFreezePlayer(PlayerVelocityEvent event) {
-		if (event.isCancelled()) return;
-		
-		Vector eventVelocity = event.getVelocity();
-		Jumper jumper = Jumper.get();
-		Vector jumpPadVelocity = jumper.getPlayerJumpPadVelocity(event.getPlayer(), eventVelocity.getY());
-		if (jumpPadVelocity == null) return;
-
-		// Don't let the user change the X and Z velocity.
-		eventVelocity.setX(jumpPadVelocity.getX());
-		eventVelocity.setZ(jumpPadVelocity.getZ());
-		event.setVelocity(eventVelocity);
+	private boolean isMoving(Vector eventVelocity) {
+		return (eventVelocity.getX() != 0.0)
+				|| (eventVelocity.getY() != 0.0)
+				|| (eventVelocity.getZ() != 0.0);
 	}
 
 	@EventHandler

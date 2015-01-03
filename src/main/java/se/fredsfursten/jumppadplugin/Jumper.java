@@ -3,18 +3,22 @@ package se.fredsfursten.jumppadplugin;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.util.Vector;
 
 public class Jumper {
 	private static Jumper singleton = null;
 
 	private HashMap<UUID, UUID> playersThatHasBeenInformedToReadTheRules = null;
-	private HashMap<UUID, JumpPadInfo> playersInJump = null;
+	private HashMap<UUID, JumpPadInfo> playersAboutToJump = null;
 	private HashMap<UUID, UUID> playersWithTemporaryJumpPause = null;
 	private AllJumpPads allJumpPads = null;
+	private JavaPlugin plugin = null;
 
 	private Jumper() {
 		this.allJumpPads = AllJumpPads.get();
@@ -28,10 +32,11 @@ public class Jumper {
 		return singleton;
 	}
 
-	void enable(){
+	void enable(JavaPlugin plugin){
+		this.plugin = plugin;
 		this.playersThatHasBeenInformedToReadTheRules = new HashMap<UUID, UUID>();
 		this.playersWithTemporaryJumpPause = new HashMap<UUID, UUID>();
-		this.playersInJump = new HashMap<UUID, JumpPadInfo>();
+		this.playersAboutToJump = new HashMap<UUID, JumpPadInfo>();
 	}
 
 	void disable() {
@@ -50,12 +55,47 @@ public class Jumper {
 			return;
 		}
 		if (hasTemporaryJumpPause(player)) return;
-
-		jump(player, info);
+		if (isAboutToJump(player)) return;
+		
+		float oldWalkSpeed = stopPlayer(player);
+		jumpSoon(player, info, oldWalkSpeed);
 	}
 
-	private void jump(Player player, JumpPadInfo info) {
-		this.playersInJump.put(player.getUniqueId(), info);
+	boolean isAboutToJump(Player player) {
+		return this.playersAboutToJump.containsKey(player.getUniqueId());
+	}
+
+	void setPlayerIsAboutToJump(Player player, JumpPadInfo info, boolean isAboutToJump) {
+		if (isAboutToJump) {
+			if (isAboutToJump(player)) return;
+			this.playersAboutToJump.put(player.getUniqueId(), info);
+		} else {
+			if (!isAboutToJump(player)) return;
+			this.playersAboutToJump.remove(player.getUniqueId());
+		}
+	}
+
+	private void jumpSoon(Player player, JumpPadInfo info, float oldWalkSpeed) {
+		setPlayerIsAboutToJump(player, info, true);
+		BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+		scheduler.scheduleSyncDelayedTask(this.plugin, new Runnable() {
+			public void run() {
+				if (!isAboutToJump(player)) return;
+				setPlayerIsAboutToJump(player, info, false);
+				player.setWalkSpeed(oldWalkSpeed);
+				jump(player, info);
+			}
+		}, 20L);
+	}
+
+	private float stopPlayer(Player player) {
+		player.setVelocity(new Vector(0.0, 0.0, 0.0));
+		float walkSpeed = player.getWalkSpeed();
+		player.setWalkSpeed(0.0F);
+		return walkSpeed;
+	}
+
+	void jump(Player player, JumpPadInfo info) {
 		Vector jumpPadVelocity = info.getVelocity();
 		Vector velocity = new Vector(jumpPadVelocity.getX(), jumpPadVelocity.getY(), jumpPadVelocity.getZ());
 		player.setVelocity(velocity);
@@ -106,19 +146,5 @@ public class Jumper {
 
 	private boolean hasReadRules(Player player) {
 		return player.hasPermission("jumppad.jump");
-	}
-
-	boolean isInAir(Player player) {
-		return this.playersInJump.containsKey(player.getUniqueId());
-	}
-
-	public Vector getPlayerJumpPadVelocity(Player player, double yVelocity) {
-		JumpPadInfo info = this.playersInJump.get(player.getUniqueId());
-		if (info == null) return null;
-		if (yVelocity == 0.0) {
-			this.playersInJump.remove(player.getUniqueId());
-			return null;
-		}
-		return info.getVelocity();
 	}
 }

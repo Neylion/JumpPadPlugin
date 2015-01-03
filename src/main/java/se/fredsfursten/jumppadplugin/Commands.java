@@ -82,7 +82,7 @@ public class Commands {
 		location = player.getLocation();
 		velocityVector = convertToVelocityVector(location, upSpeed, forwardSpeed);
 		try {
-			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player.getUniqueId(), player.getName());
+			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player);
 			this.allJumpPads.add(newInfo);
 			if (player != null) {
 				Jumper.get().playerCanJump(player, false);
