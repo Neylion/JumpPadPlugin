@@ -9,7 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class AllJumpPads implements Listener {
+public class AllJumpPads {
 	private static final String FILE_PATH = "plugins/JumpPad/jumppad_locations.bin";
 	private static AllJumpPads singleton = null;
 

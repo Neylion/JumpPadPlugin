@@ -6,7 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
-public class Commands implements Listener {
+public class Commands {
 	private static Commands singleton = null;
 	private static final String ADD_COMMAND = "/jumppad add <name> <up speed> [<forward speed>]";
 	private static final String GOTO_COMMAND = "/jumppad goto <name>";
@@ -82,7 +82,7 @@ public class Commands implements Listener {
 		location = player.getLocation();
 		velocityVector = convertToVelocityVector(location, upSpeed, forwardSpeed);
 		try {
-			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player.getUniqueId(), player.getName());
+			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player);
 			this.allJumpPads.add(newInfo);
 			if (player != null) {
 				Jumper.get().playerCanJump(player, false);

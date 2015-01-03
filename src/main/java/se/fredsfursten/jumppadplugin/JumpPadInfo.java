@@ -14,34 +14,40 @@ class JumpPadInfo {
 	private String name;
 	private UUID creatorId;
 	private String creatorName;
-	
-	JumpPadInfo(String name, Location location, Vector velocity, UUID creatorId, String creatorName)
+
+	JumpPadInfo(String name, Location location, Vector velocity, Player creator)
 	{
 		this.velocity = velocity;
 		this.name = name;
 		this.location = location;
-		this.creatorId = creatorId;
-		this.creatorName = creatorName;
+		if (creator != null)
+		{
+			this.creatorId = creator.getUniqueId();
+			this.creatorName = creator.getName();
+		} else {
+			this.creatorId = null;
+			this.creatorName = null;
+		}
 	}
-	
+
 	public static JumpPadInfo createJumpPadInfo(StorageModel storageModel)
 	{
 		Player creator = storageModel.getCreator();
-		return new JumpPadInfo(storageModel.getName(), storageModel.getLocation(), storageModel.getVelocity(), creator.getUniqueId(), creator.getName());
+		return new JumpPadInfo(storageModel.getName(), storageModel.getLocation(), storageModel.getVelocity(), creator);
 	}
-	
+
 	Vector getVelocity() {
 		return this.velocity;
 	}
-	
+
 	String getName() {
 		return this.name;
 	}
-	
+
 	Location getLocation() {
 		return this.location;
 	}
-	
+
 	String getBlockHash() {
 		return JumpPadInfo.toBlockHash(this.location);
 	}
@@ -55,16 +61,16 @@ class JumpPadInfo {
 	{
 		return String.format("%d;%d;%d", block.getX(), block.getY(), block.getZ());
 	}
-	
+
 	Player getCreator()
 	{
 		return Bukkit.getServer().getPlayer(this.creatorId);
 	}
-	
+
 	String getCreatorName() {
 		return this.creatorName;
 	}
-	
+
 	UUID getCreatorId() {
 		return this.creatorId;
 	}

@@ -3,6 +3,10 @@
 A JumpPad plugin for Minecraft.
 A JumpPad is a block that will throw away a user that steps on it in a certain direction.
 
+## Prerequisits
+
+* There must be a directory under CraftBukkit/plugins, named "JumpPad". This is where this plugin will save information about all existing jumppads.
+
 ## Functionality
 
 The plugin provides administrative commands for handling JumpPads, a way of saving and loading the created JumpPads to/from file storage and implementing the actual launching of players that step on a JumpPad.
@@ -25,9 +29,18 @@ A player must have the "jumppad.jump" permission to use a JumpPad. If he/she doe
 
 ## Release history
 
-### 1.2 (2014-09-26)
+### 1.3 (2014-01-03)
+
+* CHANGE: Now jumps as an arc instead of first straigh up and then forward.
+* CHANGE: Removed "implements" for interfaces that were not implemented.
+
+### 1.2.1 (2014-12-27)
 
 * CHANGE: Updated to be compatible with Minecraft 1.8 and Spigot
+
+### 1.2 (2014-09-26)
+
+* CHANGE: Refactoring
 
 ### 1.1 (2014-09-22)
 
