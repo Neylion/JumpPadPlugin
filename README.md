@@ -29,6 +29,10 @@ A player must have the "jumppad.jump" permission to use a JumpPad. If he/she doe
 
 ## Release history
 
+### develop
+
+* CHANGE: Removed "implements" for interfaces that were not implemented.
+
 ### 1.2.1 (2014-12-27)
 
 * CHANGE: Updated to be compatible with Minecraft 1.8 and Spigot

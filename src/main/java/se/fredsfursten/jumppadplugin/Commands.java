@@ -6,7 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
-public class Commands implements Listener {
+public class Commands {
 	private static Commands singleton = null;
 	private static final String ADD_COMMAND = "/jumppad add <name> <up speed> [<forward speed>]";
 	private static final String GOTO_COMMAND = "/jumppad goto <name>";

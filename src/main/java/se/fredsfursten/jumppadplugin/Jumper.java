@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
 
-public class Jumper implements Listener {
+public class Jumper {
 	private static Jumper singleton = null;
 
 	private HashMap<UUID, UUID> playersThatHasBeenInformedToReadTheRules = null;
