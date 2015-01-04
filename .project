@@ -3,6 +3,7 @@
 	<name>JumpPadPlugin</name>
 	<comment></comment>
 	<projects>
+		<project>PluginTools</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
