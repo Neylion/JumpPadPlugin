@@ -1,17 +1,13 @@
 package se.fredsfursten.jumppadplugin;
 
-import se.fredsfursten.plugintools.PlayerInfo;
-
-import java.util.HashMap;
-import java.util.UUID;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.util.Vector;
+
+import se.fredsfursten.plugintools.PlayerInfo;
 
 public class Jumper {
 	private static Jumper singleton = null;
@@ -44,7 +40,8 @@ public class Jumper {
 	void disable() {
 	}
 
-	void maybeJump(Player player, Location location) {
+	void maybeJump(Player player) {
+		Location location = player.getLocation();
 		JumpPadInfo info = this.allJumpPads.getByLocation(location);
 		if (info == null) {
 			mustReadRules(player, true);
