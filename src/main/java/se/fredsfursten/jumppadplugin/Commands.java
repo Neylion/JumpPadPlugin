@@ -1,10 +1,14 @@
 package se.fredsfursten.jumppadplugin;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
+
+import se.fredsfursten.plugintools.Misc;
 
 public class Commands {
 	private static Commands singleton = null;
@@ -77,9 +81,15 @@ public class Commands {
 	}
 
 	private void createOrUpdateJumpPad(Player player, String name, double upSpeed, double forwardSpeed) {
+		Block pressurePlate = Misc.getFirstBlockOfMaterial(Material.STONE_PLATE, player.getLocation(), 3);
+		if (pressurePlate == null) {
+			player.sendMessage("No stone plate within 3 blocks");
+			return;
+		}
+		
 		Location location;
 		Vector velocityVector;
-		location = player.getLocation();
+		location = pressurePlate.getLocation();
 		velocityVector = convertToVelocityVector(location, upSpeed, forwardSpeed);
 		try {
 			JumpPadInfo newInfo = new JumpPadInfo(name, location, velocityVector, player);

@@ -1,11 +1,15 @@
 package se.fredsfursten.jumppadplugin;
 
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerVelocityEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -29,8 +33,14 @@ public final class JumpPadPlugin extends JavaPlugin implements Listener {
 	}
 
 	@EventHandler
-	public void maybeJump(PlayerMoveEvent event) {
-    	Jumper.get().maybeJump(event.getPlayer(), event.getTo());
+	public void maybeJump(PlayerInteractEvent event) {
+		if (event.isCancelled()) return;
+		if (event.getAction() != Action.PHYSICAL) return;
+		Player player = event.getPlayer();
+		Block pressurePlate = event.getClickedBlock();
+		if (pressurePlate == null) return;
+		if (pressurePlate.getType() != Material.STONE_PLATE) return;
+		Jumper.get().maybeJump(player, pressurePlate);
 	}
 
 	private boolean isMoving(Vector eventVelocity) {
