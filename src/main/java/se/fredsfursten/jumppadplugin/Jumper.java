@@ -2,6 +2,8 @@ package se.fredsfursten.jumppadplugin;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -40,8 +42,9 @@ public class Jumper {
 	void disable() {
 	}
 
-	void maybeJump(Player player) {
-		Location location = player.getLocation();
+	void maybeJump(Player player, Block pressurePlate) {
+		if (pressurePlate.getType() != Material.STONE_PLATE) return;
+		Location location = pressurePlate.getLocation();
 		JumpPadInfo info = this.allJumpPads.getByLocation(location);
 		if (info == null) {
 			mustReadRules(player, true);
