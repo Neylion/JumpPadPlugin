@@ -1,22 +1,22 @@
 package se.fredsfursten.jumppadplugin;
 
-import java.util.HashMap;
-import java.util.UUID;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.util.Vector;
 
+import se.fredsfursten.plugintools.PlayerInfo;
+
 public class Jumper {
 	private static Jumper singleton = null;
 
-	private HashMap<UUID, UUID> playersThatHasBeenInformedToReadTheRules = null;
-	private HashMap<UUID, JumpPadInfo> playersAboutToJump = null;
-	private HashMap<UUID, UUID> playersWithTemporaryJumpPause = null;
+	private PlayerInfo<Object> playersThatHasBeenInformedToReadTheRules = null;
+	private PlayerInfo<JumpPadInfo> playersAboutToJump = null;
+	private PlayerInfo<Object> playersWithTemporaryJumpPause = null;
 	private AllJumpPads allJumpPads = null;
 	private JavaPlugin plugin = null;
 
@@ -34,15 +34,17 @@ public class Jumper {
 
 	void enable(JavaPlugin plugin){
 		this.plugin = plugin;
-		this.playersThatHasBeenInformedToReadTheRules = new HashMap<UUID, UUID>();
-		this.playersWithTemporaryJumpPause = new HashMap<UUID, UUID>();
-		this.playersAboutToJump = new HashMap<UUID, JumpPadInfo>();
+		this.playersThatHasBeenInformedToReadTheRules = new PlayerInfo<Object>();
+		this.playersWithTemporaryJumpPause = new PlayerInfo<Object>();
+		this.playersAboutToJump = new PlayerInfo<JumpPadInfo>();
 	}
 
 	void disable() {
 	}
 
-	void maybeJump(Player player, Location location) {
+	void maybeJump(Player player, Block pressurePlate) {
+		if (pressurePlate.getType() != Material.STONE_PLATE) return;
+		Location location = pressurePlate.getLocation();
 		JumpPadInfo info = this.allJumpPads.getByLocation(location);
 		if (info == null) {
 			mustReadRules(player, true);
@@ -62,16 +64,16 @@ public class Jumper {
 	}
 
 	boolean isAboutToJump(Player player) {
-		return this.playersAboutToJump.containsKey(player.getUniqueId());
+		return this.playersAboutToJump.hasInformation(player);
 	}
 
 	void setPlayerIsAboutToJump(Player player, JumpPadInfo info, boolean isAboutToJump) {
 		if (isAboutToJump) {
 			if (isAboutToJump(player)) return;
-			this.playersAboutToJump.put(player.getUniqueId(), info);
+			this.playersAboutToJump.put(player, info);
 		} else {
 			if (!isAboutToJump(player)) return;
-			this.playersAboutToJump.remove(player.getUniqueId());
+			this.playersAboutToJump.remove(player);
 		}
 	}
 
@@ -115,11 +117,11 @@ public class Jumper {
 	void playerCanJump(Player player, boolean canJump) {
 		if (canJump){
 			if (hasTemporaryJumpPause(player)) {
-				this.playersWithTemporaryJumpPause.remove(player.getUniqueId());
+				this.playersWithTemporaryJumpPause.remove(player);
 			}
 		} else {
 			if (!hasTemporaryJumpPause(player)) {
-				this.playersWithTemporaryJumpPause.put(player.getUniqueId(), player.getUniqueId());
+				this.playersWithTemporaryJumpPause.put(player, 1);
 			}
 		}
 	}
@@ -127,21 +129,21 @@ public class Jumper {
 	private void mustReadRules(Player player, boolean mustReadRules) {
 		if (mustReadRules) {
 			if (!shouldReadRules(player)) {
-				this.playersThatHasBeenInformedToReadTheRules.put(player.getUniqueId(), player.getUniqueId());
+				this.playersThatHasBeenInformedToReadTheRules.put(player, 1);
 			}
 		} else {
 			if (shouldReadRules(player)) {
-				this.playersThatHasBeenInformedToReadTheRules.remove(player.getUniqueId());
+				this.playersThatHasBeenInformedToReadTheRules.remove(player);
 			}
 		}
 	}
 
 	private boolean shouldReadRules(Player player) {
-		return !this.playersThatHasBeenInformedToReadTheRules.containsKey(player.getUniqueId());
+		return !this.playersThatHasBeenInformedToReadTheRules.hasInformation(player);
 	}
 
 	private boolean hasTemporaryJumpPause(Player player) {
-		return this.playersWithTemporaryJumpPause.containsKey(player.getUniqueId());
+		return this.playersWithTemporaryJumpPause.hasInformation(player);
 	}
 
 	private boolean hasReadRules(Player player) {

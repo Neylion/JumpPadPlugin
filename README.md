@@ -13,10 +13,10 @@ The plugin provides administrative commands for handling JumpPads, a way of savi
 
 ### Administrative commands
 
-* add: Add a new named JumpPad located to the block where the user is currently positioned.
+* add: Add a new named JumpPad located to the STONE_PLATE block that is closest to the player
 * edit: Edit the parameters of an existing JumpPad
 * remove: Remove an existing JumpPad
-* goto: Teleport to an existing JumpPad, temporarily stops the JumpPad from working for this user, so that he/she is not thrown away immediately
+* goto: Teleport to an existing JumpPad, temporarily stops the JumpPad from working for this player so that he/she is not thrown away immediately
 * list: Show a list with all existing JumpPads
 
 ### The actual Jump
@@ -28,6 +28,11 @@ When a user steps on a JumpPad, he/she will first be thrown up in the air (accor
 A player must have the "jumppad.jump" permission to use a JumpPad. If he/she doesn't, then he/she will be informed that she needs to read the server rules first.
 
 ## Release history
+
+### 1.4 (2014-01-12)
+
+* NEW: Uses PluginTools.PlayerInfo
+* CHANGE: Now requires a STONE_PLATE as jumppad.
 
 ### 1.3 (2014-01-03)
 
