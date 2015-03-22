@@ -1,5 +1,6 @@
 package se.fredsfursten.jumppadplugin;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,6 +8,8 @@ import java.util.HashMap;
 
 import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import se.fredsfursten.plugintools.SavingAndLoadingBinary;
 
 public class AllJumpPads {
 	private static final String FILE_PATH = "plugins/JumpPad/jumppad_locations.bin";
@@ -66,8 +69,9 @@ public class AllJumpPads {
 
 	private ArrayList<StorageModel> loadData(JavaPlugin plugin) {
 		ArrayList<StorageModel> jumpPadStorageList = null;
+		File file = new File(FILE_PATH);
 		try {
-			jumpPadStorageList = SavingAndLoadingBinary.load(FILE_PATH);
+			jumpPadStorageList = SavingAndLoadingBinary.load(file);
 		} catch (FileNotFoundException e) {
 			plugin.getLogger().info("No jump pad data file found.");
 			return null;
@@ -104,8 +108,9 @@ public class AllJumpPads {
 	}
 
 	private boolean saveData(ArrayList<StorageModel> jumpPadStorageList) {
+		File file = new File(FILE_PATH);
 		try {
-			SavingAndLoadingBinary.save(jumpPadStorageList, FILE_PATH);
+			SavingAndLoadingBinary.save(jumpPadStorageList, file);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
