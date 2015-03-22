@@ -9,14 +9,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.util.Vector;
 
-import se.fredsfursten.plugintools.PlayerInfo;
+import se.fredsfursten.plugintools.PlayerCollection;
 
 public class Jumper {
 	private static Jumper singleton = null;
 
-	private PlayerInfo<Object> playersThatHasBeenInformedToReadTheRules = null;
-	private PlayerInfo<JumpPadInfo> playersAboutToJump = null;
-	private PlayerInfo<Object> playersWithTemporaryJumpPause = null;
+	private PlayerCollection<Object> playersThatHasBeenInformedToReadTheRules = null;
+	private PlayerCollection<JumpPadInfo> playersAboutToJump = null;
+	private PlayerCollection<Object> playersWithTemporaryJumpPause = null;
 	private AllJumpPads allJumpPads = null;
 	private JavaPlugin plugin = null;
 
@@ -34,9 +34,9 @@ public class Jumper {
 
 	void enable(JavaPlugin plugin){
 		this.plugin = plugin;
-		this.playersThatHasBeenInformedToReadTheRules = new PlayerInfo<Object>();
-		this.playersWithTemporaryJumpPause = new PlayerInfo<Object>();
-		this.playersAboutToJump = new PlayerInfo<JumpPadInfo>();
+		this.playersThatHasBeenInformedToReadTheRules = new PlayerCollection<Object>();
+		this.playersWithTemporaryJumpPause = new PlayerCollection<Object>();
+		this.playersAboutToJump = new PlayerCollection<JumpPadInfo>();
 	}
 
 	void disable() {
