@@ -29,6 +29,10 @@ A player must have the "jumppad.jump" permission to use a JumpPad. If he/she doe
 
 ## Release history
 
+### 1.6 (2015-04-04)
+
+* NEW: Now uses EithonLibraryPlugin.
+
 ### 1.4 (2014-01-12)
 
 * NEW: Uses PluginTools.PlayerInfo
